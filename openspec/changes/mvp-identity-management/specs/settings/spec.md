@@ -66,23 +66,82 @@ The system SHALL display encryption status with shield icon, NOT display platfor
 - **AND** system displays identifier count and account count
 - **AND** system displays database size
 
-### Requirement: Data import and export functionality
+### Requirement: Export modes selection
 
-The system SHALL provide data import and export functionality supporting JSON and CSV formats. Export file can be optionally encrypted.
+The system SHALL provide two export modes: plain JSON (non-secure) and encrypted Hermes format (secure). System SHALL guide users to prefer secure export.
 
-#### Scenario: Import data from file
-- **WHEN** user clicks "Import" and selects file (JSON/CSV)
-- **THEN** system parses file and validates format
-- **AND** system displays import mode options: Merge / Overwrite / Skip Duplicates
-- **AND** user confirms import mode
-- **AND** system imports data and displays result summary
+#### Scenario: Export plain JSON with security warning
+- **WHEN** user clicks "Export JSON"
+- **THEN** system displays security warning dialog
+- **AND** dialog content: "导出为明文JSON文件，数据无加密保护。任何人均可查看文件内容，存在隐私泄露风险。建议使用「安全导出」保护您的数据。"
+- **AND** buttons: "使用安全导出" (primary), "继续导出JSON" (secondary)
 
-#### Scenario: Export data to file
-- **WHEN** user clicks "Export" and selects format (JSON/CSV)
-- **THEN** system generates export file
-- **AND** system displays encryption option toggle
-- **AND** if encryption enabled, user sets export password
-- **AND** system saves file to user-selected location
+#### Scenario: User proceeds with plain JSON export
+- **WHEN** user clicks "继续导出JSON"
+- **THEN** system requires user to check "我已了解风险" checkbox
+- **AND** system calls SAF to select save location
+- **AND** default filename: hermes_export_YYYYMMDD.json
+- **AND** system displays progress dialog
+- **AND** after completion, displays success message with warning reminder
+
+#### Scenario: Secure export with password
+- **WHEN** user clicks "安全导出"
+- **THEN** system displays password setting dialog
+- **AND** dialog shows optional password input fields
+- **AND** if user enters password, system validates password length >= 6
+- **AND** system requires password confirmation input
+- **AND** if user skips password, requires checking "我已了解风险" checkbox
+- **AND** dialog displays warning: "⚠️ 未设置密码时，文件可被任何拥有本应用的人打开。请勿分享或上传到云端。"
+
+#### Scenario: Secure export file creation
+- **WHEN** user confirms export settings
+- **THEN** system calls SAF to select save location
+- **AND** default filename: hermes_export_YYYYMMDD.hexport
+- **AND** system encrypts data using AES-256-GCM
+- **AND** if password set, uses PBKDF2(password + appSignature) key derivation
+- **AND** if no password, uses HKDF(appSignature) fixed key derivation
+- **AND** system displays progress dialog with percentage
+- **AND** after completion, displays success message with file path
+
+### Requirement: Import encrypted and plain files
+
+The system SHALL support importing both encrypted .hexport files and plain .json files. System SHALL detect file type automatically.
+
+#### Scenario: Import encrypted file with password
+- **WHEN** user clicks "Import Data" and selects .hexport file
+- **AND** file header indicates KDF=0x01 (password mode)
+- **THEN** system displays password input dialog
+- **AND** user enters password
+- **AND** system attempts decryption
+- **AND** if decryption fails, displays "密码错误或文件损坏"
+
+#### Scenario: Import encrypted file without password
+- **WHEN** user selects .hexport file
+- **AND** file header indicates KDF=0x02 (no password mode)
+- **THEN** system automatically attempts decryption using fixed key
+- **AND** if decryption fails, displays "文件损坏或非本应用导出"
+
+#### Scenario: Import plain JSON file
+- **WHEN** user selects .json file
+- **THEN** system directly parses JSON without decryption
+
+#### Scenario: Import preview and mode selection
+- **WHEN** file successfully parsed
+- **THEN** system displays import preview dialog
+- **AND** preview shows data summary: identifier count, account count, binding count
+- **AND** preview shows conflict detection results
+- **AND** user selects import mode: "合并" (default), "覆盖", "跳过重复"
+
+#### Scenario: Import mode definitions
+- **WHEN** user selects import mode
+- **THEN** "合并" mode: add non-existing data, keep existing data
+- **AND** "覆盖" mode: add non-existing data, replace existing data
+- **AND** "跳过重复" mode: only import non-existing data, skip all duplicates
+
+#### Scenario: Import completion
+- **WHEN** user clicks "开始导入"
+- **THEN** system displays progress dialog
+- **AND** after completion, displays result: "导入完成！新增 X条，更新 Y条，跳过 Z条"
 
 ### Requirement: Clear all data with confirmation
 
