@@ -34,9 +34,15 @@ interface IdentifierBindingDao {
     @Query("DELETE FROM identifier_binding WHERE accountId = :accountId AND identifierId = :identifierId")
     suspend fun deleteByAccountAndIdentifier(accountId: Long, identifierId: Long)
 
+    @Query("DELETE FROM identifier_binding WHERE accountId = :accountId")
+    suspend fun deleteByAccountId(accountId: Long)
+
     @Query("UPDATE identifier_binding SET purposes = :purposes WHERE id = :id")
     suspend fun updatePurposes(id: Long, purposes: String)
 
     @Query("UPDATE identifier_binding SET identifierId = :newIdentifierId WHERE accountId = :accountId AND identifierId = :oldIdentifierId")
     suspend fun switchIdentifier(accountId: Long, oldIdentifierId: Long, newIdentifierId: Long)
+
+    @Query("DELETE FROM identifier_binding")
+    suspend fun deleteAll()
 }

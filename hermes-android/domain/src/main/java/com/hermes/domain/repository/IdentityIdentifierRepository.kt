@@ -15,4 +15,5 @@ interface IdentityIdentifierRepository {
     suspend fun checkDuplicate(type: IdentifierType, value: String): Boolean
     suspend fun getBoundAccountCount(identifierId: Long): Int
     suspend fun getPendingDeactivationBefore(threshold: Instant): List<IdentityIdentifier>
+    suspend fun deleteAll()
 }

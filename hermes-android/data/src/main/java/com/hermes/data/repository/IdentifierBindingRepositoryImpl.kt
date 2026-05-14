@@ -68,4 +68,8 @@ class IdentifierBindingRepositoryImpl @Inject constructor(
     override suspend fun switchIdentifier(accountId: Long, oldIdentifierId: Long, newIdentifierId: Long) {
         dao.switchIdentifier(accountId, oldIdentifierId, newIdentifierId)
     }
+
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+    }
 }

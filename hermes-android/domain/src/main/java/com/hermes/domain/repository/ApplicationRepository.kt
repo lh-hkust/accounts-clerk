@@ -8,6 +8,7 @@ interface ApplicationRepository {
     suspend fun delete(application: Application)
     suspend fun getById(id: Long): Application?
     suspend fun getAllActive(): List<Application>
+    suspend fun getAll(): List<Application>
     suspend fun getByCategory(category: String): List<Application>
     suspend fun checkDuplicate(name: String): Boolean
     suspend fun deactivate(id: Long)

@@ -15,4 +15,5 @@ interface ApplicationAccountRepository {
     suspend fun getByIdentifierId(identifierId: Long): List<ApplicationAccount>
     suspend fun checkDuplicate(applicationId: Long, accountIdentifier: String): Boolean
     suspend fun updateStatus(id: Long, status: AccountStatus)
+    suspend fun deleteAll()
 }

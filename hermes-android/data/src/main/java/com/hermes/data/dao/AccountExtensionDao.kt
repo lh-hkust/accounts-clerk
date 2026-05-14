@@ -30,4 +30,7 @@ interface AccountExtensionDao {
 
     @Query("UPDATE account_extension SET value = :value, updatedAt = :updatedAt WHERE id = :id")
     suspend fun updateValue(id: Long, value: String?, updatedAt: Long)
+
+    @Query("DELETE FROM account_extension")
+    suspend fun deleteAll()
 }

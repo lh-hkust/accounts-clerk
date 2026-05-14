@@ -4,15 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hermes.domain.valueobject.IdentifierType
 import com.hermes.presentation.usecase.identifier.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * 标识列表 ViewModel
  */
-class IdentifierViewModel(
+@HiltViewModel
+class IdentifierViewModel @Inject constructor(
     private val getIdentifierListUseCase: GetIdentifierListUseCase,
     private val addIdentifierUseCase: AddIdentifierUseCase,
     private val deleteIdentifierUseCase: DeleteIdentifierUseCase,

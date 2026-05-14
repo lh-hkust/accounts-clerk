@@ -33,4 +33,7 @@ interface ApplicationDao {
 
     @Query("UPDATE application SET isActive = :isActive, updatedAt = :updatedAt WHERE id = :id")
     suspend fun updateActiveStatus(id: Long, isActive: Boolean, updatedAt: Long)
+
+    @Query("SELECT * FROM application ORDER BY name ASC")
+    suspend fun getAll(): List<ApplicationEntity>
 }

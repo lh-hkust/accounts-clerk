@@ -20,6 +20,11 @@ sealed class Screen(
         fun createRoute(id: Long) = "warning/$id"
     }
     object Settings : Screen("settings", "设置")
+    object DataManagement : Screen("data_management", "数据管理")
+    object NotificationSettings : Screen("notification_settings", "通知设置")
+    object PrivacySecurity : Screen("privacy_security", "隐私安全")
+    object SetPassword : Screen("set_password", "设置密码")
+    object About : Screen("about", "关于")
     object ScheduleDeactivation : Screen("schedule_deactivation/{id}", "设置到期提醒") {
         fun createRoute(id: Long) = "schedule_deactivation/$id"
     }

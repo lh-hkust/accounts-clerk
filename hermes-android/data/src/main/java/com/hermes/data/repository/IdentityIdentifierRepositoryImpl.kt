@@ -61,4 +61,8 @@ class IdentityIdentifierRepositoryImpl @Inject constructor(
     override suspend fun getPendingDeactivationBefore(threshold: Instant): List<IdentityIdentifier> {
         return dao.getPendingDeactivationBefore(threshold.toEpochMilli()).map { it.toDomainModel() }
     }
+
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+    }
 }

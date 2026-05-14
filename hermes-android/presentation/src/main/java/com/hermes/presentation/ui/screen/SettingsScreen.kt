@@ -1,187 +1,232 @@
 package com.hermes.presentation.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.hermes.presentation.ui.theme.HermesColors
 
 /**
- * 设置页面
+ * 设置页面（与原型一致）
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit = {},
+    onDataManageClick: () -> Unit = {},
+    onNotificationClick: () -> Unit = {},
+    onPrivacyClick: () -> Unit = {},
+    onAboutClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text("设置") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = HermesColors.Surface
-                )
-            )
-        },
-        containerColor = HermesColors.Background
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // 隐私与安全
-            SettingsSection(title = "隐私与安全") {
-                SettingsItem(
-                    title = "数据库加密",
-                    subtitle = "已启用 SQLCipher 加密",
-                    icon = "🔐"
-                )
-                SettingsItem(
-                    title = "生物识别解锁",
-                    subtitle = "使用指纹或面容解锁",
-                    icon = "👆"
-                )
-                SettingsItem(
-                    title = "自动锁定",
-                    subtitle = "5分钟后自动锁定",
-                    icon = "🔒"
-                )
-            }
-
-            // 通知设置
-            SettingsSection(title = "通知设置") {
-                SettingsItem(
-                    title = "停用计划提醒",
-                    subtitle = "提前7天通知",
-                    icon = "⚠️"
-                )
-                SettingsItem(
-                    title = "预警通知",
-                    subtitle = "实时推送预警",
-                    icon = "🔔"
-                )
-            }
-
-            // 数据管理
-            SettingsSection(title = "数据管理") {
-                SettingsItem(
-                    title = "数据导出",
-                    subtitle = "导出为 JSON/CSV 格式",
-                    icon = "📤"
-                )
-                SettingsItem(
-                    title = "数据导入",
-                    subtitle = "从文件导入数据",
-                    icon = "📥"
-                )
-                SettingsItem(
-                    title = "清除数据",
-                    subtitle = "删除所有本地数据",
-                    icon = "🗑️"
-                )
-            }
-
-            // 应用信息
-            SettingsSection(title = "应用信息") {
-                SettingsItem(
-                    title = "版本",
-                    subtitle = "1.0.0",
-                    icon = "📦"
-                )
-                SettingsItem(
-                    title = "关于 Hermes",
-                    subtitle = "账号管理工具",
-                    icon = "ℹ️"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 版权信息
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .background(HermesColors.Background),
+        contentPadding = PaddingValues(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // 标题 - 原型样式（底部导航页无需返回）
+        item {
             Text(
-                text = "© 2026 Hermes Team",
-                style = MaterialTheme.typography.bodySmall,
-                color = HermesColors.TextMuted,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                text = "设置",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 24.dp),
+                color = HermesColors.TextPrimary
             )
+        }
+
+        // 用户信息卡片 - 原型样式：头像+名称+单机版本
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = HermesColors.Surface)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 头像 - 原型样式：渐变圆形背景
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(HermesColors.Primary, HermesColors.Secondary)
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Person,
+                            contentDescription = "用户",
+                            modifier = Modifier.size(24.dp),
+                            tint = HermesColors.TextPrimary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column {
+                        Text(
+                            text = "本地用户",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = HermesColors.TextPrimary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "单机版本",
+                            fontSize = 12.sp,
+                            color = HermesColors.TextMuted
+                        )
+                    }
+                }
+            }
+        }
+
+        // 设置项卡片 - 原型样式
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = HermesColors.Surface)
+            ) {
+                Column {
+                    // 数据管理
+                    SettingItemRow(
+                        icon = Icons.Filled.Download,
+                        iconColor = HermesColors.Primary,
+                        title = "数据管理",
+                        onClick = onDataManageClick
+                    )
+                    HorizontalDivider(color = HermesColors.CardBorder)
+                    // 通知设置
+                    SettingItemRow(
+                        icon = Icons.Filled.Notifications,
+                        iconColor = HermesColors.Warning,
+                        title = "通知设置",
+                        onClick = onNotificationClick
+                    )
+                    HorizontalDivider(color = HermesColors.CardBorder)
+                    // 隐私安全
+                    SettingItemRow(
+                        icon = Icons.Filled.Lock,
+                        iconColor = HermesColors.Success,
+                        title = "隐私安全",
+                        onClick = onPrivacyClick
+                    )
+                }
+            }
+        }
+
+        // 关于卡片 - 原型样式
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = HermesColors.Surface)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .clickable { onAboutClick() },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = "关于",
+                        tint = HermesColors.TextMuted
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "关于",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = HermesColors.TextPrimary
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "1.0.0",
+                        fontSize = 12.sp,
+                        color = HermesColors.TextMuted
+                    )
+                }
+            }
+        }
+
+        // 退出登录按钮 - 原型样式：红色边框
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = HermesColors.Surface.copy(alpha = 0.8f)
+                )
+            ) {
+                Text(
+                    text = "退出登录",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = HermesColors.Danger
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun SettingsSection(
+private fun SettingItemRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconColor: androidx.compose.ui.graphics.Color,
     title: String,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = HermesColors.TextPrimary
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = HermesColors.Surface)
-        ) {
-            Column(
-                modifier = Modifier.padding(vertical = 8.dp),
-                content = content
-            )
-        }
-    }
-}
-
-@Composable
-private fun SettingsItem(
-    title: String,
-    subtitle: String,
-    icon: String,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(16.dp)
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = icon,
-            style = MaterialTheme.typography.titleMedium
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconColor
         )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = HermesColors.TextPrimary
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = HermesColors.TextSecondary
-            )
-        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = title,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = HermesColors.TextPrimary
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Icon(
+            imageVector = Icons.Filled.ChevronRight,
+            contentDescription = null,
+            tint = HermesColors.TextMuted
+        )
     }
 }

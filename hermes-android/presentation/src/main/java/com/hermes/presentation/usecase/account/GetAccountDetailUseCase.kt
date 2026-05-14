@@ -4,11 +4,12 @@ import com.hermes.domain.repository.ApplicationAccountRepository
 import com.hermes.domain.repository.ApplicationRepository
 import com.hermes.domain.repository.IdentifierBindingRepository
 import com.hermes.domain.repository.IdentityIdentifierRepository
+import javax.inject.Inject
 
 /**
  * 获取账户详情用例
  */
-class GetAccountDetailUseCase(
+class GetAccountDetailUseCase @Inject constructor(
     private val accountRepository: ApplicationAccountRepository,
     private val applicationRepository: ApplicationRepository,
     private val bindingRepository: IdentifierBindingRepository,
@@ -41,8 +42,15 @@ class GetAccountDetailUseCase(
             account = account,
             applicationName = application?.name ?: "",
             applicationIconUrl = application?.iconUrl,
-            boundIdentifiers = boundIdentifiers,
-            boundIdentifierCount = bindings.size
+            boundIdentifiers = boundIdentifiers.map { info ->
+                IdentifierBindingInfo(
+                    identifierId = info.identifierId,
+                    identifierType = info.identifierType,
+                    identifierValue = info.identifierValue,
+                    purposes = info.purposes
+                )
+            },
+            relatedAccounts = emptyList()
         )
     }
 }
@@ -53,9 +61,10 @@ class GetAccountDetailUseCase(
 data class AccountDetail(
     val account: com.hermes.domain.model.ApplicationAccount,
     val applicationName: String,
-    val applicationIconUrl: String?,
-    val boundIdentifiers: List<BoundIdentifierInfo>,
-    val boundIdentifierCount: Int
+    val applicationIconUrl: String? = null,
+    val applicationCategory: String = "",
+    val boundIdentifiers: List<IdentifierBindingInfo>,
+    val relatedAccounts: List<RelatedAccountInfo> = emptyList()
 )
 
 /**

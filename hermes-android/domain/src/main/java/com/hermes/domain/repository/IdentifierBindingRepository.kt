@@ -15,4 +15,5 @@ interface IdentifierBindingRepository {
     suspend fun deleteByAccountAndIdentifier(accountId: Long, identifierId: Long)
     suspend fun updatePurposes(id: Long, purposes: List<BindingPurpose>)
     suspend fun switchIdentifier(accountId: Long, oldIdentifierId: Long, newIdentifierId: Long)
+    suspend fun deleteAll()
 }

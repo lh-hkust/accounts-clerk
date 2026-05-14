@@ -164,7 +164,7 @@ fun ImpactAnalysisScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "1. 金融账户优先更换绑定标识\n2. 社交账户可延后处理\n3. 建议在新标识激活后再停用旧标识",
+                        text = "1. 金融账号优先更换绑定渠道\n2. 社交账号可延后处理\n3. 建议在新渠道激活后再停用旧渠道",
                         style = MaterialTheme.typography.bodyMedium,
                         color = HermesColors.TextSecondary
                     )

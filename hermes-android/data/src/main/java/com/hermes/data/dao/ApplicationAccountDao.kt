@@ -39,4 +39,7 @@ interface ApplicationAccountDao {
 
     @Query("UPDATE application_account SET status = :status, updatedAt = :updatedAt WHERE id = :id")
     suspend fun updateStatus(id: Long, status: String, updatedAt: Long)
+
+    @Query("DELETE FROM application_account")
+    suspend fun deleteAll()
 }

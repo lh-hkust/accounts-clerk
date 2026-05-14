@@ -86,4 +86,13 @@ class ApplicationAccountRepositoryImpl @Inject constructor(
     override suspend fun updateStatus(id: Long, status: AccountStatus) {
         accountDao.updateStatus(id, status.name, java.time.Instant.now().toEpochMilli())
     }
+
+    override suspend fun deleteAll() {
+        // Delete bindings first, then accounts
+        val accounts = accountDao.getAll()
+        for (account in accounts) {
+            bindingDao.deleteByAccountId(account.id)
+        }
+        accountDao.deleteAll()
+    }
 }

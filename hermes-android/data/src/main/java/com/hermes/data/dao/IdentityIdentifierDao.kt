@@ -39,4 +39,7 @@ interface IdentityIdentifierDao {
 
     @Query("SELECT * FROM identity_identifier WHERE status = 'PENDING_DEACTIVATION' AND plannedDeactTime <= :threshold ORDER BY plannedDeactTime ASC")
     suspend fun getPendingDeactivationBefore(threshold: Long): List<IdentityIdentifierEntity>
+
+    @Query("DELETE FROM identity_identifier")
+    suspend fun deleteAll()
 }

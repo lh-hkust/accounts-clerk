@@ -60,4 +60,8 @@ class ApplicationRepositoryImpl @Inject constructor(
     override suspend fun activate(id: Long) {
         dao.updateActiveStatus(id, true, Instant.now().toEpochMilli())
     }
+
+    override suspend fun getAll(): List<Application> {
+        return dao.getAll().map { app -> app.toDomainModel() }
+    }
 }
