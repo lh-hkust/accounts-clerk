@@ -322,6 +322,208 @@
         .social-taobao { background: #ff4400; }
         .social-jd { background: #e53935; }
         .social-github { background: #333; }
+
+        /* Card Gesture Styles */
+        .card-swipe-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-swipe-content {
+            transition: transform 0.2s ease;
+        }
+
+        .swipe-action-left {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .swipe-action-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .card.swiped-left .swipe-action-left {
+            opacity: 1;
+        }
+
+        .card.swiped-right .swipe-action-right {
+            opacity: 1;
+        }
+
+        .gesture-hint {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            display: flex;
+            gap: 4px;
+            opacity: 0.4;
+        }
+
+        .gesture-hint-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #64748b;
+        }
+
+        .long-press-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .card:active .long-press-indicator {
+            border-color: var(--primary);
+        }
+
+        /* Purpose Chip Colors */
+        .purpose-login { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .purpose-verification { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
+        .purpose-recovery { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
+        .purpose-notification { background: rgba(234, 179, 8, 0.2); color: #eab308; }
+        .purpose-secondary { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+        .purpose-chip-selected {
+            border: 2px solid currentColor;
+        }
+
+        /* Progress Dialog Styles */
+        .progress-indicator {
+            height: 8px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-indicator-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Mode Card Styles */
+        .mode-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mode-card.selected {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .mode-card:active {
+            transform: scale(0.98);
+        }
+
+        /* Checkbox Styles */
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #64748b;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-custom.checked {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
+        .checkbox-custom.checked i {
+            color: white;
+        }
+
+        /* Warning Block Dialog */
+        .binding-account-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Status Option */
+        .status-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .status-option.selected {
+            border: 1px solid var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .status-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-radio {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #64748b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-radio.selected {
+            border-color: var(--primary);
+        }
+
+        .status-radio.selected::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -474,20 +676,29 @@
                     <button class="px-4 py-2 bg-gray-800 text-gray-300 text-xs font-semibold rounded-full whitespace-nowrap">即将过期</button>
                 </div>
 
-                <div class="card cursor-pointer" onclick="goToPage('page-credential-detail')">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                            <i class="fa-solid fa-mobile text-xl text-gray-400"></i>
-                            <div>
-                                <p class="text-white font-medium">138 0013 8000</p>
-                                <p class="text-gray-500 text-xs">中国移动 (北京)</p>
+                <div class="card card-swipe-container cursor-pointer" onclick="goToPage('page-credential-detail')" oncontextmenu="showModal('modal-identifier-menu');return false">
+                    <div class="swipe-action-right">编辑</div>
+                    <div class="swipe-action-left">删除</div>
+                    <div class="card-swipe-content card-swipe-relative">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-solid fa-mobile text-xl text-gray-400"></i>
+                                <div>
+                                    <p class="text-white font-medium">138 0013 8000</p>
+                                    <p class="text-gray-500 text-xs">中国移动 (北京)</p>
+                                </div>
                             </div>
+                            <span class="badge badge-warning">即将到期</span>
                         </div>
-                        <span class="badge badge-warning">即将到期</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="text-gray-400">关联账号: 14个</span>
-                        <span class="text-yellow-400">到期日期: 2026-06-01</span>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-gray-400">关联账号: 14个</span>
+                            <span class="text-yellow-400">到期日期: 2026-06-01</span>
+                        </div>
+                        <div class="gesture-hint">
+                            <div class="gesture-hint-dot"></div>
+                            <div class="gesture-hint-dot"></div>
+                            <div class="gesture-hint-dot"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -813,10 +1024,10 @@
                 </div>
 
                 <div class="space-y-3">
-                    <button class="btn-secondary w-full">编辑账号</button>
-                    <button class="btn-secondary w-full">更换验证渠道</button>
-                    <button class="btn-secondary w-full text-yellow-400 border-yellow-500/30">变更账号状态</button>
-                    <button class="btn-secondary w-full text-red-400 border-red-500/30">删除账号</button>
+                    <button class="btn-secondary w-full" onclick="goToPage('page-edit-account')">编辑账号</button>
+                    <button class="btn-secondary w-full" onclick="showModal('modal-change-channel')">更换验证渠道</button>
+                    <button class="btn-secondary w-full text-yellow-400 border-yellow-500/30" onclick="showModal('modal-change-status')">变更账号状态</button>
+                    <button class="btn-secondary w-full text-red-400 border-red-500/30" onclick="showModal('modal-delete-account')">删除账号</button>
                 </div>
             </div>
         </div>
@@ -1058,6 +1269,147 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Edit Account Page -->
+        <div id="page-edit-account" class="page">
+            <div class="pt-6 pb-4">
+                <div class="flex items-center gap-4 mb-6">
+                    <button class="p-2 -ml-2" onclick="goToPage('page-account-detail')">
+                        <i class="fa-solid fa-chevron-left text-white"></i>
+                    </button>
+                    <h1 class="text-white font-bold">编辑账号</h1>
+                </div>
+
+                <!-- Application (Non-editable) -->
+                <div class="mb-6">
+                    <p class="text-gray-400 text-xs mb-3">当前应用</p>
+                    <div class="card p-4 opacity-60">
+                        <div class="flex items-center gap-3">
+                            <div class="social-icon social-weibo">
+                                <i class="fa-brands fa-weibo text-white"></i>
+                            </div>
+                            <div>
+                                <p class="text-white font-medium">微博</p>
+                                <p class="text-gray-500 text-xs">应用不可修改</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Name -->
+                <div class="mb-4">
+                    <p class="text-gray-400 text-xs mb-2">账号名称</p>
+                    <input type="text" value="张三" class="input-field w-full" placeholder="账号名称" />
+                </div>
+
+                <!-- Account Identifier -->
+                <div class="mb-4">
+                    <p class="text-gray-400 text-xs mb-2">账号ID / 用户名</p>
+                    <input type="text" value="zhangsan123" class="input-field w-full" placeholder="账号标识" />
+                </div>
+
+                <!-- Nickname -->
+                <div class="mb-4">
+                    <p class="text-gray-400 text-xs mb-2">昵称（可选）</p>
+                    <input type="text" value="工作小号01" class="input-field w-full" placeholder="昵称" />
+                    <p class="text-gray-500 text-xs mt-1">昵称用于列表显示，可清空</p>
+                </div>
+
+                <!-- Status -->
+                <div class="mb-6">
+                    <p class="text-gray-400 text-xs mb-3">账号状态</p>
+                    <div class="status-option selected" onclick="selectStatus(this)">
+                        <div class="status-radio selected"></div>
+                        <span class="text-white">正常使用</span>
+                        <span class="badge badge-success ml-auto">当前状态</span>
+                    </div>
+                    <div class="status-option" onclick="selectStatus(this)">
+                        <div class="status-radio"></div>
+                        <span class="text-white">已冻结</span>
+                    </div>
+                    <div class="status-option" onclick="selectStatus(this)">
+                        <div class="status-radio"></div>
+                        <span class="text-white">已丢失</span>
+                    </div>
+                    <div class="status-option" onclick="selectStatus(this)">
+                        <div class="status-radio"></div>
+                        <span class="text-white">已归档</span>
+                    </div>
+                </div>
+
+                <!-- Bound Channels -->
+                <div class="mb-6">
+                    <p class="text-gray-400 text-xs mb-3">绑定验证渠道</p>
+                    <div class="card p-3 mb-3 border-blue-500/30">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-mobile text-blue-400"></i>
+                                <span class="text-white">138****8000</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="flex gap-1">
+                                    <span class="text-xs purpose-login px-2 py-0.5 rounded">登录</span>
+                                    <span class="text-xs purpose-verification px-2 py-0.5 rounded">验证</span>
+                                </div>
+                                <button class="text-gray-500 hover:text-red-400" onclick="removeBinding(this)">
+                                    <i class="fa-solid fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-secondary w-full py-3 text-sm" onclick="showModal('modal-add-binding')">
+                        <i class="fa-solid fa-plus mr-2"></i>添加绑定渠道
+                    </button>
+                </div>
+
+                <button class="btn-primary w-full" onclick="goToPage('page-account-detail')">保存修改</button>
+            </div>
+        </div>
+
+        <!-- Edit Credential Page -->
+        <div id="page-edit-credential" class="page">
+            <div class="pt-6 pb-4">
+                <div class="flex items-center gap-4 mb-6">
+                    <button class="p-2 -ml-2" onclick="goToPage('page-credential-detail')">
+                        <i class="fa-solid fa-chevron-left text-white"></i>
+                    </button>
+                    <h1 class="text-white font-bold">编辑验证渠道</h1>
+                </div>
+
+                <!-- Channel Type (Non-editable) -->
+                <div class="mb-6">
+                    <p class="text-gray-400 text-xs mb-3">渠道类型</p>
+                    <div class="card p-4 opacity-60">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-mobile text-blue-400 text-xl"></i>
+                            <div>
+                                <p class="text-white font-medium">手机号</p>
+                                <p class="text-gray-500 text-xs">类型不可修改</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Channel Value (Non-editable) -->
+                <div class="mb-6">
+                    <p class="text-gray-400 text-xs mb-3">渠道值</p>
+                    <div class="card p-4 opacity-60">
+                        <p class="text-white font-medium">138 0013 8000</p>
+                        <p class="text-gray-500 text-xs mt-1">值不可修改（唯一性约束）</p>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-2">如需更换渠道，请删除旧渠道并添加新渠道</p>
+                </div>
+
+                <!-- Remarks (Editable) -->
+                <div class="mb-6">
+                    <p class="text-gray-400 text-xs mb-2">备注（可选）</p>
+                    <input type="text" value="中国移动 (北京) - 主号" class="input-field w-full" placeholder="备注" />
+                    <p class="text-gray-500 text-xs mt-1">备注可新增/修改/清空</p>
+                </div>
+
+                <button class="btn-primary w-full" onclick="goToPage('page-credential-detail')">保存修改</button>
             </div>
         </div>
 
@@ -1337,13 +1689,690 @@
         </div>
     </div>
 
+    <!-- Export Security Warning Modal -->
+    <div id="modal-export-warning" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-triangle-exclamation text-yellow-400 text-xl"></i>
+                </div>
+                <h2 class="text-white font-bold">安全警告</h2>
+            </div>
+
+            <p class="text-gray-400 text-sm mb-4">导出为明文JSON文件，数据无加密保护。任何人均可查看文件内容，存在隐私泄露风险。</p>
+            <p class="text-blue-400 text-sm mb-6">建议使用「安全导出」保护您的数据。</p>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="showModal('modal-secure-export');closeModal('modal-export-warning')">使用安全导出</button>
+                <button class="btn-primary flex-1 bg-gradient-to-r from-red-500 to-red-600" onclick="showModal('modal-plain-export-confirm');closeModal('modal-export-warning')">继续导出JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plain Export Risk Confirmation Modal -->
+    <div id="modal-plain-export-confirm" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <h2 class="text-white font-bold mb-4">风险确认</h2>
+            <p class="text-gray-400 text-sm mb-4">导出明文JSON文件存在以下风险：</p>
+            <ul class="text-gray-400 text-xs mb-4 list-disc pl-4">
+                <li>文件内容无加密保护</li>
+                <li>任何人均可查看您的账号信息</li>
+                <li>分享或上传可能导致隐私泄露</li>
+            </ul>
+
+            <div class="flex items-center gap-3 mb-6 p-3 bg-red-500/10 rounded-lg cursor-pointer" onclick="toggleCheckbox(this)">
+                <div class="checkbox-custom" id="checkbox-risk-plain">
+                    <i class="fa-solid fa-check text-xs hidden"></i>
+                </div>
+                <span class="text-white text-sm">我已了解风险</span>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-plain-export-confirm')">取消</button>
+                <button class="btn-primary flex-1" onclick="showModal('modal-export-progress');closeModal('modal-plain-export-confirm')">确认导出</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secure Export Password Modal -->
+    <div id="modal-secure-export" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <h2 class="text-white font-bold mb-4">安全导出</h2>
+            <p class="text-gray-400 text-sm mb-4">为导出文件设置密码可保护数据安全。若不设置密码，文件仍加密但任何拥有本应用的人都能打开。</p>
+
+            <!-- Password Input -->
+            <div class="mb-4">
+                <p class="text-gray-400 text-xs mb-2">导出密码（可选）</p>
+                <input type="password" id="export-password" class="input-field w-full" placeholder="输入密码" oninput="checkPasswordMatch()" />
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-4" id="confirm-password-section" style="display: none;">
+                <p class="text-gray-400 text-xs mb-2">确认密码</p>
+                <input type="password" id="export-password-confirm" class="input-field w-full" placeholder="确认密码" oninput="checkPasswordMatch()" />
+            </div>
+
+            <!-- Password Strength Hint -->
+            <p class="text-gray-500 text-xs mb-4" id="password-hint">密码强度提示：至少6个字符</p>
+
+            <!-- No Password Risk Checkbox -->
+            <div class="flex items-center gap-3 mb-4 p-3 bg-yellow-500/10 rounded-lg cursor-pointer" id="no-password-section" onclick="toggleCheckbox(this)">
+                <div class="checkbox-custom" id="checkbox-no-password">
+                    <i class="fa-solid fa-check text-xs hidden"></i>
+                </div>
+                <span class="text-white text-sm">我已了解风险，不设置密码</span>
+            </div>
+
+            <!-- Warning when no password -->
+            <div class="p-3 bg-red-500/10 rounded-lg mb-6" id="no-password-warning" style="display: none;">
+                <div class="flex items-start gap-2">
+                    <i class="fa-solid fa-exclamation-circle text-red-400 mt-1"></i>
+                    <p class="text-red-400 text-xs">未设置密码时，文件可被任何拥有本应用的人打开。请勿分享或上传到云端。</p>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-secure-export')">取消</button>
+                <button class="btn-primary flex-1" onclick="showModal('modal-export-progress');closeModal('modal-secure-export')">开始导出</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Progress Modal -->
+    <div id="modal-export-progress" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <h2 class="text-white font-bold mb-6">正在导出...</h2>
+
+            <!-- Progress Bar -->
+            <div class="progress-indicator mb-4">
+                <div class="progress-indicator-fill" id="export-progress-bar" style="width: 35%"></div>
+            </div>
+
+            <!-- Percentage -->
+            <p class="text-white text-2xl font-bold mb-4 text-center" id="export-percentage">35%</p>
+
+            <!-- Stage Text -->
+            <p class="text-gray-400 text-sm text-center" id="export-stage">正在处理：验证渠道数据</p>
+        </div>
+    </div>
+
+    <!-- Export Complete Modal -->
+    <div id="modal-export-complete" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-check text-green-400 text-2xl"></i>
+                </div>
+                <h2 class="text-white font-bold mb-2">导出完成</h2>
+                <p class="text-green-400 text-sm">文件已加密保存</p>
+            </div>
+
+            <!-- File Path -->
+            <div class="card p-4 mb-4">
+                <p class="text-gray-400 text-xs mb-2">文件位置</p>
+                <p class="text-white text-sm mb-3 truncate">/storage/Download/hermes_export_20260514.hexport</p>
+                <button class="btn-secondary w-full py-2 text-sm">
+                    <i class="fa-solid fa-copy mr-2"></i>复制路径
+                </button>
+            </div>
+
+            <p class="text-yellow-400 text-xs text-center mb-4">请妥善保管导出文件，避免分享或上传云端</p>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1">打开文件</button>
+                <button class="btn-primary flex-1" onclick="closeModal('modal-export-complete')">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Progress Modal -->
+    <div id="modal-import-progress" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <h2 class="text-white font-bold mb-6">正在导入...</h2>
+
+            <!-- Progress Bar -->
+            <div class="progress-indicator mb-4">
+                <div class="progress-indicator-fill" id="import-progress-bar" style="width: 65%"></div>
+            </div>
+
+            <!-- Percentage -->
+            <p class="text-white text-2xl font-bold mb-4 text-center" id="import-percentage">65%</p>
+
+            <!-- Stage Text -->
+            <p class="text-gray-400 text-sm text-center" id="import-stage">正在处理：账号绑定关系</p>
+        </div>
+    </div>
+
+    <!-- Import Preview Modal -->
+    <div id="modal-import-preview" class="modal-overlay">
+        <div class="modal-content fade-enter max-h-[85vh] overflow-y-auto">
+            <h2 class="text-white font-bold mb-4">导入预览</h2>
+
+            <!-- Data Summary -->
+            <div class="card p-4 mb-4">
+                <h3 class="text-white font-semibold mb-3 text-sm">数据摘要</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <p class="text-white text-xl font-bold">8</p>
+                        <p class="text-gray-400 text-xs">验证渠道</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-white text-xl font-bold">45</p>
+                        <p class="text-gray-400 text-xs">账号</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-white text-xl font-bold">128</p>
+                        <p class="text-gray-400 text-xs">绑定关系</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conflict Detection -->
+            <div class="card p-4 mb-4 border-yellow-500/30">
+                <h3 class="text-yellow-400 font-semibold mb-3 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-exclamation-triangle"></i>冲突检测
+                </h3>
+                <p class="text-gray-400 text-xs mb-2">检测到以下重复数据：</p>
+                <ul class="text-gray-400 text-xs list-disc pl-4">
+                    <li>验证渠道：138****8000（已存在）</li>
+                    <li>账号：微博 - zhangsan（已存在）</li>
+                </ul>
+            </div>
+
+            <!-- Import Mode Selection -->
+            <div class="mb-6">
+                <h3 class="text-white font-semibold mb-3 text-sm">选择导入模式</h3>
+                <div class="mode-card selected mb-3" onclick="selectImportMode(this)">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-white font-semibold">合并</p>
+                            <p class="text-gray-400 text-xs mt-1">新增不存在数据，保留已有数据</p>
+                        </div>
+                        <i class="fa-solid fa-check text-blue-400"></i>
+                    </div>
+                </div>
+                <div class="mode-card mb-3" onclick="selectImportMode(this)">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-white font-semibold">覆盖</p>
+                            <p class="text-gray-400 text-xs mt-1">新增不存在数据，替换已有数据</p>
+                        </div>
+                        <i class="fa-solid fa-check text-blue-400 hidden"></i>
+                    </div>
+                </div>
+                <div class="mode-card" onclick="selectImportMode(this)">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-white font-semibold">跳过重复</p>
+                            <p class="text-gray-400 text-xs mt-1">仅导入不存在数据，跳过所有重复</p>
+                        </div>
+                        <i class="fa-solid fa-check text-blue-400 hidden"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-import-preview')">取消</button>
+                <button class="btn-primary flex-1" onclick="showModal('modal-import-progress');closeModal('modal-import-preview')">开始导入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Complete Modal -->
+    <div id="modal-import-complete" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-check text-green-400 text-2xl"></i>
+                </div>
+                <h2 class="text-white font-bold mb-2">导入完成</h2>
+            </div>
+
+            <!-- Import Result -->
+            <div class="card p-4 mb-6">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <p class="text-green-400 text-xl font-bold">42</p>
+                        <p class="text-gray-400 text-xs">新增</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-blue-400 text-xl font-bold">3</p>
+                        <p class="text-gray-400 text-xs">更新</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-gray-400 text-xl font-bold">2</p>
+                        <p class="text-gray-500 text-xs">跳过</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary w-full" onclick="closeModal('modal-import-complete')">关闭</button>
+        </div>
+    </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div id="modal-delete-account" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-trash text-red-400 text-xl"></i>
+                </div>
+                <h2 class="text-white font-bold">确认删除账号？</h2>
+            </div>
+
+            <p class="text-gray-400 text-sm mb-2">账号：微博 - 工作小号01</p>
+            <p class="text-gray-500 text-xs mb-4">此操作不可撤销</p>
+
+            <!-- Anti-mistake Input -->
+            <div class="mb-6">
+                <p class="text-gray-400 text-xs mb-2">请输入「工作小号01」确认删除</p>
+                <input type="text" id="delete-confirm-input" class="input-field w-full" placeholder="输入账号昵称" oninput="checkDeleteConfirm()" />
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-delete-account')">取消</button>
+                <button class="btn-primary flex-1 bg-gradient-to-r from-red-500 to-red-600 opacity-50" id="delete-confirm-btn" disabled>确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Channel Block Modal -->
+    <div id="modal-delete-channel-block" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-ban text-red-400 text-xl"></i>
+                </div>
+                <h2 class="text-white font-bold">无法删除</h2>
+            </div>
+
+            <p class="text-white text-sm mb-2">此渠道绑定了 <span class="text-red-400 font-bold">3</span> 个账号，无法删除</p>
+            <p class="text-gray-400 text-xs mb-4">请先解绑以下账号后再删除</p>
+
+            <!-- Binding Account List -->
+            <div class="binding-account-list mb-6">
+                <div class="card p-3 mb-2 cursor-pointer" onclick="goToPage('page-account-detail');closeModal('modal-delete-channel-block')">
+                    <div class="flex items-center gap-3">
+                        <div class="social-icon social-wechat">
+                            <i class="fa-brands fa-weixin text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-white font-medium text-sm">微信 - 主账号</p>
+                            <p class="text-gray-500 text-xs">用途：登录、验证</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-gray-500 ml-auto"></i>
+                    </div>
+                </div>
+                <div class="card p-3 mb-2 cursor-pointer" onclick="goToPage('page-account-detail');closeModal('modal-delete-channel-block')">
+                    <div class="flex items-center gap-3">
+                        <div class="social-icon social-alipay">
+                            <i class="fa-brands fa-alipay text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-white font-medium text-sm">支付宝</p>
+                            <p class="text-gray-500 text-xs">用途：找回密码</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-gray-500 ml-auto"></i>
+                    </div>
+                </div>
+                <div class="card p-3 cursor-pointer" onclick="goToPage('page-account-detail');closeModal('modal-delete-channel-block')">
+                    <div class="flex items-center gap-3">
+                        <div class="social-icon social-douyin">
+                            <i class="fa-brands fa-tiktok text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-white font-medium text-sm">抖音</p>
+                            <p class="text-gray-500 text-xs">用途：仅登录</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-gray-500 ml-auto"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-delete-channel-block')">取消</button>
+                <button class="btn-primary flex-1" onclick="closeModal('modal-delete-channel-block')">查看绑定账号</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Account Status Modal -->
+    <div id="modal-change-status" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <h2 class="text-white font-bold mb-4">变更账号状态</h2>
+
+            <!-- Current Status -->
+            <div class="card p-3 mb-4">
+                <p class="text-gray-400 text-xs mb-1">当前状态</p>
+                <p class="text-white font-semibold">正常使用</p>
+            </div>
+
+            <!-- Status Options -->
+            <div class="mb-6">
+                <p class="text-gray-400 text-xs mb-3">选择新状态</p>
+                <div class="status-option disabled mb-2">
+                    <div class="status-radio"></div>
+                    <span class="text-white">正常使用</span>
+                    <span class="text-gray-500 text-xs ml-auto">当前状态</span>
+                </div>
+                <div class="status-option mb-2" onclick="selectNewStatus(this)">
+                    <div class="status-radio"></div>
+                    <span class="text-white">已冻结</span>
+                    <p class="text-gray-500 text-xs ml-auto">账号将被标记为冻结状态</p>
+                </div>
+                <div class="status-option mb-2" onclick="selectNewStatus(this)">
+                    <div class="status-radio"></div>
+                    <span class="text-white">已丢失</span>
+                    <p class="text-gray-500 text-xs ml-auto">账号将被标记为丢失，无法找回</p>
+                </div>
+                <div class="status-option" onclick="selectNewStatus(this)">
+                    <div class="status-radio"></div>
+                    <span class="text-white">已归档</span>
+                    <p class="text-gray-500 text-xs ml-auto">账号将被隐藏，可在设置中恢复显示</p>
+                </div>
+            </div>
+
+            <p class="text-gray-500 text-xs mb-4 text-center">任意状态均可切换，如找回账号可从「已丢失」切换至「正常使用」</p>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-change-status')">取消</button>
+                <button class="btn-primary flex-1" onclick="closeModal('modal-change-status')">确认变更</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Verification Channel Modal -->
+    <div id="modal-change-channel" class="modal-overlay">
+        <div class="modal-content fade-enter max-h-[85vh] overflow-y-auto">
+            <h2 class="text-white font-bold mb-4">更换验证渠道</h2>
+
+            <!-- Current Binding -->
+            <div class="card p-4 mb-4 border-blue-500/30">
+                <p class="text-gray-400 text-xs mb-2">当前绑定</p>
+                <div class="flex items-center gap-3 mb-3">
+                    <i class="fa-solid fa-mobile text-blue-400"></i>
+                    <span class="text-white">138****8000</span>
+                </div>
+                <div class="flex gap-2">
+                    <span class="text-xs purpose-verification px-2 py-0.5 rounded">验证</span>
+                    <span class="text-xs purpose-recovery px-2 py-0.5 rounded">找回</span>
+                </div>
+            </div>
+
+            <!-- Select New Channel -->
+            <div class="mb-4">
+                <p class="text-gray-400 text-xs mb-2">选择新渠道</p>
+                <div class="input-field mb-3">
+                    <i class="fa-solid fa-search text-gray-500 mr-2"></i>
+                    <input type="text" placeholder="搜索渠道..." class="bg-transparent border-none outline-none text-white placeholder-gray-500 w-full" />
+                </div>
+            </div>
+
+            <!-- Channel List -->
+            <div class="card p-3 mb-2 border-blue-500/30 selected-channel" onclick="selectNewChannel(this)">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-envelope text-purple-400"></i>
+                        <div>
+                            <p class="text-white font-medium">test@qq.com</p>
+                            <p class="text-gray-500 text-xs">正常使用</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-check text-blue-400"></i>
+                </div>
+            </div>
+            <div class="card p-3 mb-2" onclick="selectNewChannel(this)">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-mobile text-blue-400"></i>
+                        <div>
+                            <p class="text-white font-medium">139****0000</p>
+                            <p class="text-gray-500 text-xs">正常使用</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-3 mb-2 opacity-60" onclick="selectNewChannel(this)">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-mobile text-blue-400"></i>
+                        <div>
+                            <p class="text-white font-medium">137****2222</p>
+                            <p class="text-yellow-400 text-xs">即将到期</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purpose Settings -->
+            <div class="card p-4 mb-4">
+                <p class="text-gray-400 text-xs mb-2">用途设置</p>
+                <p class="text-white text-sm mb-3">当前用途将自动保留：验证、找回</p>
+                <button class="btn-secondary w-full py-2 text-sm" onclick="showModal('modal-purpose-select')">
+                    <i class="fa-solid fa-edit mr-2"></i>修改用途（可选）
+                </button>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-change-channel')">取消</button>
+                <button class="btn-primary flex-1" onclick="closeModal('modal-change-channel')">确认更换</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purpose Selection Modal -->
+    <div id="modal-purpose-select" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <h2 class="text-white font-bold mb-4">选择绑定用途</h2>
+            <p class="text-gray-400 text-xs mb-4">可多选，至少选择一项</p>
+
+            <!-- Purpose Chips -->
+            <div class="flex flex-wrap gap-3 mb-6">
+                <div class="px-4 py-2 rounded-full cursor-pointer purpose-login purpose-chip-selected" onclick="togglePurpose(this)">
+                    登录
+                </div>
+                <div class="px-4 py-2 rounded-full cursor-pointer purpose-verification purpose-chip-selected" onclick="togglePurpose(this)">
+                    验证
+                </div>
+                <div class="px-4 py-2 rounded-full cursor-pointer purpose-recovery purpose-chip-selected" onclick="togglePurpose(this)">
+                    找回
+                </div>
+                <div class="px-4 py-2 rounded-full cursor-pointer purpose-notification" onclick="togglePurpose(this)">
+                    通知
+                </div>
+                <div class="px-4 py-2 rounded-full cursor-pointer purpose-secondary" onclick="togglePurpose(this)">
+                    二次验证
+                </div>
+            </div>
+
+            <p class="text-gray-500 text-xs mb-4 text-center">默认选中：验证</p>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-purpose-select')">取消</button>
+                <button class="btn-primary flex-1" onclick="closeModal('modal-purpose-select')">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Long Press Context Menu (Identifier) -->
+    <div id="modal-identifier-menu" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <h2 class="text-white font-bold mb-4">快捷操作</h2>
+
+            <div class="space-y-2">
+                <button class="btn-secondary w-full text-left" onclick="goToPage('page-edit-credential');closeModal('modal-identifier-menu')">
+                    <i class="fa-solid fa-edit mr-3 text-blue-400"></i>编辑渠道
+                </button>
+                <button class="btn-secondary w-full text-left" onclick="showModal('modal-set-reminder');closeModal('modal-identifier-menu')">
+                    <i class="fa-solid fa-clock mr-3 text-yellow-400"></i>设置到期提醒
+                </button>
+                <button class="btn-secondary w-full text-left" onclick="showModal('modal-mark-deactivated');closeModal('modal-identifier-menu')">
+                    <i class="fa-solid fa-times-circle mr-3 text-red-400"></i>标记已失效
+                </button>
+                <button class="btn-secondary w-full text-left" onclick="showModal('modal-delete-channel-block');closeModal('modal-identifier-menu')">
+                    <i class="fa-solid fa-trash mr-3 text-red-400"></i>删除渠道
+                </button>
+                <button class="btn-secondary w-full text-left mt-4" onclick="closeModal('modal-identifier-menu')">
+                    <i class="fa-solid fa-times mr-3 text-gray-400"></i>取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Long Press Context Menu (Account) -->
+    <div id="modal-account-menu" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <h2 class="text-white font-bold mb-4">快捷操作</h2>
+
+            <div class="space-y-2">
+                <button class="btn-secondary w-full text-left" onclick="goToPage('page-edit-account');closeModal('modal-account-menu')">
+                    <i class="fa-solid fa-edit mr-3 text-blue-400"></i>编辑账号
+                </button>
+                <button class="btn-secondary w-full text-left" onclick="showModal('modal-change-channel');closeModal('modal-account-menu')">
+                    <i class="fa-solid fa-sync mr-3 text-purple-400"></i>更换验证渠道
+                </button>
+                <button class="btn-secondary w-full text-left" onclick="showModal('modal-change-status');closeModal('modal-account-menu')">
+                    <i class="fa-solid fa-exchange-alt mr-3 text-yellow-400"></i>变更账号状态
+                </button>
+                <button class="btn-secondary w-full text-left" onclick="showModal('modal-delete-account');closeModal('modal-account-menu')">
+                    <i class="fa-solid fa-trash mr-3 text-red-400"></i>删除账号
+                </button>
+                <button class="btn-secondary w-full text-left mt-4" onclick="closeModal('modal-account-menu')">
+                    <i class="fa-solid fa-times mr-3 text-gray-400"></i>取消
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Set Reminder Modal -->
+    <div id="modal-set-reminder" class="modal-overlay">
+        <div class="modal-content fade-enter">
+            <h2 class="text-white font-bold mb-4">设置到期提醒</h2>
+
+            <div class="card p-3 mb-4">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-mobile text-blue-400"></i>
+                    <span class="text-white">138****8000</span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-gray-400 text-xs mb-2">到期日期</p>
+                <input type="date" class="input-field w-full" value="2026-06-01" />
+            </div>
+
+            <div class="mb-6">
+                <p class="text-gray-400 text-xs mb-2">提醒时间</p>
+                <div class="flex items-center gap-3 mb-3 p-3 bg-green-500/10 rounded-lg">
+                    <div class="checkbox-custom checked">
+                        <i class="fa-solid fa-check text-xs"></i>
+                    </div>
+                    <span class="text-white text-sm">提前30天提醒</span>
+                </div>
+                <div class="flex items-center gap-3 mb-3 p-3 bg-green-500/10 rounded-lg">
+                    <div class="checkbox-custom checked">
+                        <i class="fa-solid fa-check text-xs"></i>
+                    </div>
+                    <span class="text-white text-sm">提前7天提醒</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
+                    <div class="checkbox-custom">
+                        <i class="fa-solid fa-check text-xs hidden"></i>
+                    </div>
+                    <span class="text-white text-sm">提前1天提醒</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-set-reminder')">取消</button>
+                <button class="btn-primary flex-1" onclick="closeModal('modal-set-reminder')">确认设置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Binding Modal -->
+    <div id="modal-add-binding" class="modal-overlay">
+        <div class="modal-content fade-enter max-h-[85vh] overflow-y-auto">
+            <h2 class="text-white font-bold mb-4">添加绑定渠道</h2>
+
+            <div class="input-field mb-3">
+                <i class="fa-solid fa-search text-gray-500 mr-2"></i>
+                <input type="text" placeholder="搜索渠道..." class="bg-transparent border-none outline-none text-white placeholder-gray-500 w-full" />
+            </div>
+
+            <!-- Available Channels -->
+            <div class="mb-4">
+                <p class="text-gray-400 text-xs mb-2 text-green-400">● 正常使用</p>
+                <div class="card p-3 mb-2" onclick="selectBindingChannel(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-envelope text-purple-400"></i>
+                            <span class="text-white">test@qq.com</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-3 mb-2" onclick="selectBindingChannel(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-mobile text-blue-400"></i>
+                            <span class="text-white">139****0000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Separator -->
+            <div class="border-t border-gray-700 my-4"></div>
+
+            <!-- Expiring Soon -->
+            <div class="mb-4">
+                <p class="text-gray-400 text-xs mb-2 text-yellow-400">● 即将到期</p>
+                <div class="card p-3 mb-2 bg-yellow-500/5" onclick="selectBindingChannel(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-mobile text-blue-400"></i>
+                            <span class="text-white">137****2222</span>
+                        </div>
+                        <span class="badge badge-warning">15天后</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Separator -->
+            <div class="border-t border-gray-700 my-4"></div>
+
+            <!-- Deactivated -->
+            <div class="mb-4">
+                <p class="text-gray-400 text-xs mb-2 text-red-400">● 已失效</p>
+                <button class="btn-secondary w-full py-2 text-xs mb-3" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none';this.textContent = this.textContent.includes('查看') ? '收起已失效' : '▸ 查看全部已失效'">
+                    ▸ 查看全部已失效
+                </button>
+                <div style="display: none;">
+                    <div class="card p-3 mb-2 opacity-60" onclick="selectBindingChannel(this)">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-solid fa-envelope text-gray-400"></i>
+                                <span class="text-gray-400">old@mail.com</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="btn-secondary flex-1" onclick="closeModal('modal-add-binding')">取消</button>
+                <button class="btn-primary flex-1" onclick="closeModal('modal-add-binding')">添加绑定</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function goToPage(pageId) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            
+
             document.getElementById(pageId).classList.add('active');
-            
+
             const navId = 'nav-' + pageId.replace('page-', '');
             const navItem = document.getElementById(navId);
             if (navItem) {
@@ -1368,6 +2397,218 @@
                     document.body.style.overflow = '';
                 }
             });
+        });
+
+        // Toggle checkbox
+        function toggleCheckbox(element) {
+            const checkbox = element.querySelector('.checkbox-custom');
+            const icon = checkbox.querySelector('i');
+            checkbox.classList.toggle('checked');
+            icon.classList.toggle('hidden');
+        }
+
+        // Password match check for secure export
+        function checkPasswordMatch() {
+            const password = document.getElementById('export-password').value;
+            const confirmSection = document.getElementById('confirm-password-section');
+            const hint = document.getElementById('password-hint');
+            const noPasswordSection = document.getElementById('no-password-section');
+            const noPasswordWarning = document.getElementById('no-password-warning');
+
+            if (password.length > 0) {
+                confirmSection.style.display = 'block';
+                noPasswordSection.style.display = 'none';
+                noPasswordWarning.style.display = 'none';
+
+                if (password.length < 6) {
+                    hint.textContent = '密码强度不足：至少6个字符';
+                    hint.classList.add('text-red-400');
+                    hint.classList.remove('text-gray-500');
+                } else {
+                    hint.textContent = '密码强度提示：至少6个字符';
+                    hint.classList.remove('text-red-400');
+                    hint.classList.add('text-gray-500');
+                }
+            } else {
+                confirmSection.style.display = 'none';
+                noPasswordSection.style.display = 'block';
+            }
+        }
+
+        // Delete account confirmation input check
+        function checkDeleteConfirm() {
+            const input = document.getElementById('delete-confirm-input').value;
+            const btn = document.getElementById('delete-confirm-btn');
+            const expectedValue = '工作小号01';
+
+            if (input === expectedValue) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('opacity-50');
+            }
+        }
+
+        // Import mode selection
+        function selectImportMode(element) {
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.fa-solid').classList.add('hidden');
+            });
+            element.classList.add('selected');
+            element.querySelector('.fa-solid').classList.remove('hidden');
+        }
+
+        // Status selection
+        function selectStatus(element) {
+            document.querySelectorAll('.status-option').forEach(option => {
+                option.classList.remove('selected');
+                option.querySelector('.status-radio').classList.remove('selected');
+            });
+            element.classList.add('selected');
+            element.querySelector('.status-radio').classList.add('selected');
+        }
+
+        // New status selection in modal
+        function selectNewStatus(element) {
+            document.querySelectorAll('#modal-change-status .status-option').forEach(option => {
+                option.classList.remove('selected');
+                if (option.querySelector('.status-radio')) {
+                    option.querySelector('.status-radio').classList.remove('selected');
+                }
+            });
+            element.classList.add('selected');
+            element.querySelector('.status-radio').classList.add('selected');
+        }
+
+        // Select new channel in change channel modal
+        function selectNewChannel(element) {
+            document.querySelectorAll('#modal-change-channel .card').forEach(card => {
+                card.classList.remove('border-blue-500/30', 'selected-channel');
+                const checkIcon = card.querySelector('.fa-check');
+                if (checkIcon) {
+                    checkIcon.classList.add('hidden');
+                }
+            });
+            element.classList.add('border-blue-500/30', 'selected-channel');
+            const checkIcon = element.querySelector('.fa-check');
+            if (checkIcon) {
+                checkIcon.classList.remove('hidden');
+            } else {
+                // Add check icon if not exists
+                const iconContainer = element.querySelector('.flex').lastElementChild;
+                if (iconContainer && !iconContainer.classList.contains('fa-check')) {
+                    const newIcon = document.createElement('i');
+                    newIcon.className = 'fa-solid fa-check text-blue-400';
+                    element.querySelector('.flex').appendChild(newIcon);
+                }
+            }
+        }
+
+        // Toggle purpose chip
+        function togglePurpose(element) {
+            element.classList.toggle('purpose-chip-selected');
+        }
+
+        // Remove binding
+        function removeBinding(button) {
+            button.closest('.card').remove();
+        }
+
+        // Select binding channel
+        function selectBindingChannel(element) {
+            element.classList.toggle('border-blue-500/30');
+        }
+
+        // Card gesture simulation (swipe)
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.querySelectorAll('.card-swipe-container').forEach(card => {
+            card.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+
+            card.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe(card, touchStartX, touchEndX);
+            });
+
+            // Mouse simulation for desktop
+            card.addEventListener('mousedown', function(e) {
+                touchStartX = e.screenX;
+            });
+
+            card.addEventListener('mouseup', function(e) {
+                touchEndX = e.screenX;
+                handleSwipe(card, touchStartX, touchEndX);
+            });
+        });
+
+        function handleSwipe(card, startX, endX) {
+            const swipeDistance = endX - startX;
+            const cardWidth = card.offsetWidth;
+            const threshold = cardWidth * 0.3;
+
+            if (swipeDistance > threshold) {
+                // Right swipe - show edit action
+                card.classList.add('swiped-right');
+                card.classList.remove('swiped-left');
+            } else if (swipeDistance < -threshold) {
+                // Left swipe - show delete action
+                card.classList.add('swiped-left');
+                card.classList.remove('swiped-right');
+            } else {
+                // Reset
+                card.classList.remove('swiped-left', 'swiped-right');
+            }
+        }
+
+        // Simulate export progress
+        function simulateExportProgress() {
+            const progressBar = document.getElementById('export-progress-bar');
+            const percentage = document.getElementById('export-percentage');
+            const stage = document.getElementById('export-stage');
+
+            let progress = 0;
+            const stages = ['验证渠道数据', '账号数据', '绑定关系数据', '生成加密文件'];
+
+            const interval = setInterval(() => {
+                progress += 5;
+                if (progress > 100) {
+                    clearInterval(interval);
+                    showModal('modal-export-complete');
+                    closeModal('modal-export-progress');
+                    return;
+                }
+
+                progressBar.style.width = progress + '%';
+                percentage.textContent = progress + '%';
+                stage.textContent = '正在处理：' + stages[Math.floor(progress / 25)];
+            }, 200);
+        }
+
+        // Update data tools page buttons to show dialogs
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers for data tools buttons
+            const exportButtons = document.querySelectorAll('#page-data-tools .btn-secondary');
+            if (exportButtons.length > 0) {
+                // JSON export button
+                exportButtons[0].addEventListener('click', function() {
+                    showModal('modal-export-warning');
+                });
+                // Secure export button - already handled
+                exportButtons[1].addEventListener('click', function() {
+                    showModal('modal-secure-export');
+                });
+                // Import buttons
+                if (exportButtons[2]) {
+                    exportButtons[2].addEventListener('click', function() {
+                        showModal('modal-import-preview');
+                    });
+                }
+            }
         });
     </script>
 </body>
