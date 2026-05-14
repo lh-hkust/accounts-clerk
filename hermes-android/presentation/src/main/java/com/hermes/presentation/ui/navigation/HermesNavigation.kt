@@ -17,6 +17,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.hermes.domain.valueobject.AccountStatus
+import com.hermes.domain.valueobject.BindingPurpose
+import com.hermes.presentation.ui.component.AccountStatusSelectionDialog
+import com.hermes.presentation.ui.component.SwitchBindingDialog
 import com.hermes.presentation.ui.screen.*
 import com.hermes.presentation.ui.theme.HermesColors
 import com.hermes.presentation.viewmodel.*
@@ -78,11 +82,21 @@ fun HermesNavigation(
                 val viewModel: IdentifierViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 val operationState by viewModel.operationState.collectAsStateWithLifecycle()
+                val deleteCheckState by viewModel.deleteCheckState.collectAsStateWithLifecycle()
 
                 IdentifierListScreen(
                     uiState = uiState,
+                    deleteCheckState = deleteCheckState,
                     onIdentifierClick = { id -> navController.navigate(Screen.IdentifierDetail.createRoute(id)) },
-                    onAddClick = { navController.navigate(Screen.AddIdentifier.route) }
+                    onAddClick = { navController.navigate(Screen.AddIdentifier.route) },
+                    onEditIdentifier = { id -> navController.navigate(Screen.EditIdentifier.createRoute(id)) },
+                    onSetReminder = { id -> navController.navigate(Screen.ScheduleDeactivation.createRoute(id)) },
+                    onModifyReminder = { id -> navController.navigate(Screen.ScheduleDeactivation.createRoute(id)) },
+                    onCheckDelete = { id -> viewModel.checkDeleteState(id) },
+                    onConfirmDelete = { id -> viewModel.deleteIdentifier(id) },
+                    onViewBoundAccounts = { id -> navController.navigate(Screen.IdentifierDetail.createRoute(id)) },
+                    onAccountClick = { accountId -> navController.navigate(Screen.AccountDetail.createRoute(accountId)) },
+                    onResetDeleteCheckState = { viewModel.resetDeleteCheckState() }
                 )
 
                 // 处理操作结果
@@ -108,6 +122,7 @@ fun HermesNavigation(
                 val viewModel: IdentifierDetailViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 val deactivationDetail by viewModel.deactivationDetail.collectAsStateWithLifecycle()
+                val deleteCheckState by viewModel.deleteCheckState.collectAsStateWithLifecycle()
 
                 // 加载详情
                 LaunchedEffect(id) {
@@ -117,14 +132,18 @@ fun HermesNavigation(
                 IdentifierDetailScreen(
                     uiState = uiState,
                     deactivationDetail = deactivationDetail,
+                    deleteCheckState = deleteCheckState,
                     onBackClick = { navController.popBackStack() },
-                    onDeleteClick = { viewModel.deleteIdentifier(id) },
+                    onDeleteClick = { viewModel.checkDeleteState(id) },
+                    onCheckDelete = { viewModel.checkDeleteState(it) },
+                    onConfirmDelete = { viewModel.deleteIdentifier(id) },
                     onAccountClick = { accountId -> navController.navigate(Screen.AccountDetail.createRoute(accountId)) },
                     onCancelDeactivation = { viewModel.cancelDeactivation(id) },
                     onModifyDeactivation = { navController.navigate(Screen.ScheduleDeactivation.createRoute(id)) },
                     onScheduleDeactivation = { navController.navigate(Screen.ScheduleDeactivation.createRoute(id)) },
                     onBatchChange = { /* TODO: 批量更换 */ },
                     onMarkHandled = { viewModel.handleWarning(id) },
+                    onViewBoundAccounts = { navController.navigate(Screen.IdentifierDetail.createRoute(id)) },
                     canDelete = false
                 )
             }
@@ -161,12 +180,46 @@ fun HermesNavigation(
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 val operationState by viewModel.operationState.collectAsStateWithLifecycle()
 
+                // 变更状态对话框状态
+                var showStatusDialog by remember { mutableStateOf(false) }
+                var selectedAccountId by remember { mutableStateOf<Long?>(null) }
+                var selectedAccountStatus by remember { mutableStateOf<AccountStatus?>(null) }
+
                 AccountListScreen(
                     uiState = uiState,
                     onAccountClick = { id -> navController.navigate(Screen.AccountDetail.createRoute(id)) },
                     onAddClick = { navController.navigate(Screen.AddAccount.route) },
-                    onRefresh = { viewModel.loadAccounts() }
+                    onRefresh = { viewModel.loadAccounts() },
+                    onChangeStatus = { accountId ->
+                        // 获取当前账号状态并显示对话框
+                        if (uiState is AccountListState.Success) {
+                            val account = (uiState as AccountListState.Success).items.find { it.account.id == accountId }
+                            if (account != null) {
+                                selectedAccountId = accountId
+                                selectedAccountStatus = account.account.status
+                                showStatusDialog = true
+                            }
+                        }
+                    }
                 )
+
+                // 变更账号状态对话框
+                if (showStatusDialog && selectedAccountStatus != null && selectedAccountId != null) {
+                    AccountStatusSelectionDialog(
+                        currentStatus = selectedAccountStatus!!,
+                        onStatusSelected = { newStatus ->
+                            viewModel.updateStatus(selectedAccountId!!, newStatus)
+                            showStatusDialog = false
+                            selectedAccountId = null
+                            selectedAccountStatus = null
+                        },
+                        onDismiss = {
+                            showStatusDialog = false
+                            selectedAccountId = null
+                            selectedAccountStatus = null
+                        }
+                    )
+                }
             }
 
             // 账号详情 - 使用AccountDetailViewModel
@@ -177,6 +230,15 @@ fun HermesNavigation(
                 val id = backStackEntry.arguments?.getLong("id") ?: 0L
                 val viewModel: AccountDetailViewModel = hiltViewModel()
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                val operationState by viewModel.operationState.collectAsStateWithLifecycle()
+                val availableIdentifiers by viewModel.availableIdentifiersForSwitch.collectAsStateWithLifecycle()
+                val currentBinding by viewModel.currentBindingForSwitch.collectAsStateWithLifecycle()
+                val switchBindingState by viewModel.switchBindingOperationState.collectAsStateWithLifecycle()
+
+                // 对话框状态
+                var showStatusDialog by remember { mutableStateOf(false) }
+                var showSwitchBindingDialog by remember { mutableStateOf(false) }
+                var selectedBindingId by remember { mutableStateOf<Long?>(null) }
 
                 LaunchedEffect(id) {
                     viewModel.loadAccountDetail(id)
@@ -186,11 +248,57 @@ fun HermesNavigation(
                     uiState = uiState,
                     onBackClick = { navController.popBackStack() },
                     onEditClick = { /* TODO */ },
-                    onChangeChannelClick = { /* TODO */ },
-                    onChangeStatusClick = { /* TODO */ },
+                    onChangeChannelClick = { bindingId ->
+                        // 设置当前绑定ID并准备更换
+                        selectedBindingId = bindingId
+                        viewModel.prepareSwitchBinding(id, bindingId)
+                        showSwitchBindingDialog = true
+                    },
+                    onChangeStatusClick = { showStatusDialog = true },
                     onDeleteClick = { /* TODO */ },
                     onRelatedAccountClick = { relatedId -> navController.navigate(Screen.AccountDetail.createRoute(relatedId)) }
                 )
+
+                // 变更账号状态对话框
+                if (showStatusDialog && uiState is AccountDetailState.Success) {
+                    val currentStatus = (uiState as AccountDetailState.Success).detail.account.status
+                    AccountStatusSelectionDialog(
+                        currentStatus = currentStatus,
+                        onStatusSelected = { newStatus ->
+                            viewModel.updateStatus(id, newStatus)
+                            showStatusDialog = false
+                        },
+                        onDismiss = { showStatusDialog = false }
+                    )
+                }
+
+                // 更换验证渠道对话框
+                if (showSwitchBindingDialog && currentBinding != null && switchBindingState is SwitchBindingOperationState.Prepared) {
+                    SwitchBindingDialog(
+                        currentBinding = currentBinding!!,
+                        availableIdentifiers = availableIdentifiers,
+                        onConfirm = { newIdentifierId, newPurposes ->
+                            viewModel.switchBinding(
+                                accountId = id,
+                                oldIdentifierId = currentBinding!!.identifierId,
+                                newIdentifierId = newIdentifierId,
+                                newPurposes = newPurposes
+                            )
+                            showSwitchBindingDialog = false
+                        },
+                        onDismiss = {
+                            showSwitchBindingDialog = false
+                            viewModel.resetSwitchBindingState()
+                        }
+                    )
+                }
+
+                // 更换成功后返回
+                LaunchedEffect(switchBindingState) {
+                    if (switchBindingState is SwitchBindingOperationState.Success) {
+                        viewModel.resetSwitchBindingState()
+                    }
+                }
             }
 
             // 添加账号 - 使用AccountViewModel
@@ -365,6 +473,47 @@ fun HermesNavigation(
                     identifierId = id,
                     onBackClick = { navController.popBackStack() }
                 )
+            }
+
+            // 编辑渠道 - 使用EditIdentifierViewModel
+            composable(
+                Screen.EditIdentifier.route,
+                arguments = listOf(navArgument("id") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getLong("id") ?: 0L
+                val viewModel: EditIdentifierViewModel = hiltViewModel()
+                val identifier by viewModel.identifier.collectAsStateWithLifecycle()
+                val deactivationDetail by viewModel.deactivationDetail.collectAsStateWithLifecycle()
+                val operationState by viewModel.operationState.collectAsStateWithLifecycle()
+
+                LaunchedEffect(id) {
+                    viewModel.loadIdentifier(id)
+                }
+
+                if (identifier != null) {
+                    EditIdentifierScreen(
+                        identifierType = identifier!!.type,
+                        identifierValue = identifier!!.value,
+                        identifierStatus = identifier!!.status,
+                        plannedDeactTime = identifier!!.plannedDeactTime,
+                        deactReason = identifier!!.deactReason,
+                        currentRemark = identifier!!.remark,
+                        deactivationDetail = deactivationDetail,
+                        operationState = operationState,
+                        onBackClick = { navController.popBackStack() },
+                        onSaveClick = { remark -> viewModel.updateRemark(remark) },
+                        onCancelDeactivation = { viewModel.cancelDeactivation() },
+                        onModifyDeactivation = { navController.navigate(Screen.ScheduleDeactivation.createRoute(id)) }
+                    )
+                }
+
+                // 成功后返回
+                LaunchedEffect(operationState) {
+                    if (operationState is OperationState.Success) {
+                        navController.popBackStack()
+                        viewModel.resetOperationState()
+                    }
+                }
             }
         }
     }

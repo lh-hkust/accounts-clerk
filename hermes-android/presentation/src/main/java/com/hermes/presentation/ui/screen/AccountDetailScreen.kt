@@ -36,7 +36,7 @@ fun AccountDetailScreen(
     uiState: AccountDetailState,
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
-    onChangeChannelClick: () -> Unit,
+    onChangeChannelClick: (Long) -> Unit,
     onChangeStatusClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onRelatedAccountClick: (Long) -> Unit,
@@ -101,7 +101,7 @@ fun AccountDetailScreen(
                         items(uiState.detail.boundIdentifiers) { identifier ->
                             BoundIdentifierCard(
                                 identifier = identifier,
-                                onChangeClick = onChangeChannelClick
+                                onChangeClick = { onChangeChannelClick(identifier.identifierId) }
                             )
                         }
                     }
@@ -145,7 +145,7 @@ fun AccountDetailScreen(
 
                             // 更换验证渠道按钮
                             OutlinedButton(
-                                onClick = onChangeChannelClick,
+                                onClick = { uiState.detail.boundIdentifiers.firstOrNull()?.identifierId?.let { onChangeChannelClick(it) } },
                                 modifier = Modifier.fillMaxWidth().height(48.dp),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(

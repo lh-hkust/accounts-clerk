@@ -22,7 +22,8 @@ object DatabaseModule {
             context,
             HermesDatabase::class.java,
             "hermes_db"
-        ).build()
+        ).fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides

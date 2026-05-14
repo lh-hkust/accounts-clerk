@@ -20,7 +20,8 @@ class AccountViewModel @Inject constructor(
     private val getAccountListUseCase: GetAccountListUseCase,
     private val addAccountUseCase: AddAccountUseCase,
     private val updateAccountStatusUseCase: UpdateAccountStatusUseCase,
-    private val addAccountExtensionUseCase: AddAccountExtensionUseCase
+    private val addAccountExtensionUseCase: AddAccountExtensionUseCase,
+    private val deleteAccountUseCase: DeleteAccountUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AccountListState>(AccountListState.Loading)
@@ -28,6 +29,9 @@ class AccountViewModel @Inject constructor(
 
     private val _operationState = MutableStateFlow<OperationState>(OperationState.Idle)
     val operationState: StateFlow<OperationState> = _operationState.asStateFlow()
+
+    private val _deleteState = MutableStateFlow<DeleteState>(DeleteState.Idle)
+    val deleteState: StateFlow<DeleteState> = _deleteState.asStateFlow()
 
     init {
         loadAccounts()
@@ -114,6 +118,43 @@ class AccountViewModel @Inject constructor(
 
     fun resetOperationState() {
         _operationState.value = OperationState.Idle
+    }
+
+    /**
+     * 删除账户（自动解绑所有绑定关系）
+     */
+    fun deleteAccount(accountId: Long) {
+        viewModelScope.launch {
+            _deleteState.value = DeleteState.InProgress
+            try {
+                val result = deleteAccountUseCase(accountId)
+                when (result) {
+                    is DeleteAccountResult.Success -> {
+                        _deleteState.value = DeleteState.Success(
+                            accountName = result.accountName,
+                            unboundCount = result.unboundCount
+                        )
+                        // 刷新列表
+                        loadAccounts()
+                    }
+                    is DeleteAccountResult.AccountNotFound -> {
+                        _deleteState.value = DeleteState.Error("账号不存在")
+                    }
+                    is DeleteAccountResult.Error -> {
+                        _deleteState.value = DeleteState.Error(result.message)
+                    }
+                }
+            } catch (e: Exception) {
+                _deleteState.value = DeleteState.Error(e.message ?: "删除失败")
+            }
+        }
+    }
+
+    /**
+     * 重置删除状态
+     */
+    fun resetDeleteState() {
+        _deleteState.value = DeleteState.Idle
     }
 }
 

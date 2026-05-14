@@ -61,6 +61,10 @@ class IdentifierBindingRepositoryImpl @Inject constructor(
         dao.deleteByAccountAndIdentifier(accountId, identifierId)
     }
 
+    override suspend fun deleteByAccountId(accountId: Long) {
+        dao.deleteByAccountId(accountId)
+    }
+
     override suspend fun updatePurposes(id: Long, purposes: List<BindingPurpose>) {
         dao.updatePurposes(id, purposes.joinToString(",") { it.name })
     }

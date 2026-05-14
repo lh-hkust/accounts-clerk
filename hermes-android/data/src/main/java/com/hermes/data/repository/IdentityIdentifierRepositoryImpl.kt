@@ -23,6 +23,7 @@ class IdentityIdentifierRepositoryImpl @Inject constructor(
             status = identifier.status,
             plannedDeactTime = identifier.plannedDeactTime,
             deactReason = identifier.deactReason,
+            remark = identifier.remark,
             createdAt = identifier.createdAt,
             updatedAt = identifier.updatedAt
         )

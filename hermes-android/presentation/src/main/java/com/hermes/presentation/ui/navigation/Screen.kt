@@ -31,6 +31,12 @@ sealed class Screen(
     object ImpactAnalysis : Screen("impact/{id}", "关联账号") {
         fun createRoute(id: Long) = "impact/$id"
     }
+    object EditIdentifier : Screen("edit_identifier/{id}", "编辑渠道") {
+        fun createRoute(id: Long) = "edit_identifier/$id"
+    }
+    object EditAccount : Screen("edit_account/{id}", "编辑账号") {
+        fun createRoute(id: Long) = "edit_account/$id"
+    }
 }
 
 sealed class BottomNavItem(

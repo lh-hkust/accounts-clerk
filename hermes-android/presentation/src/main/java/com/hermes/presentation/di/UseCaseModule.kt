@@ -9,6 +9,7 @@ import com.hermes.domain.repository.IdentityIdentifierRepository
 import com.hermes.domain.repository.WarningRecordRepository
 import com.hermes.presentation.usecase.account.AddAccountExtensionUseCase
 import com.hermes.presentation.usecase.account.AddAccountUseCase
+import com.hermes.presentation.usecase.account.DeleteAccountUseCase
 import com.hermes.presentation.usecase.account.GetAccountDetailUseCase
 import com.hermes.presentation.usecase.account.GetAccountListUseCase
 import com.hermes.presentation.usecase.account.UpdateAccountStatusUseCase
@@ -77,9 +78,11 @@ object UseCaseModule {
     @Singleton
     fun provideDeleteIdentifierUseCase(
         identifierRepository: IdentityIdentifierRepository,
-        bindingRepository: IdentifierBindingRepository
+        bindingRepository: IdentifierBindingRepository,
+        accountRepository: ApplicationAccountRepository,
+        applicationRepository: ApplicationRepository
     ): DeleteIdentifierUseCase {
-        return DeleteIdentifierUseCase(identifierRepository, bindingRepository)
+        return DeleteIdentifierUseCase(identifierRepository, bindingRepository, accountRepository, applicationRepository)
     }
 
     @Provides
@@ -134,6 +137,16 @@ object UseCaseModule {
         accountRepository: ApplicationAccountRepository
     ): AddAccountExtensionUseCase {
         return AddAccountExtensionUseCase(accountRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeleteAccountUseCase(
+        accountRepository: ApplicationAccountRepository,
+        bindingRepository: IdentifierBindingRepository,
+        bindingHistoryRepository: BindingHistoryRepository
+    ): DeleteAccountUseCase {
+        return DeleteAccountUseCase(accountRepository, bindingRepository, bindingHistoryRepository)
     }
 
     // ========== Deactivation UseCases ==========

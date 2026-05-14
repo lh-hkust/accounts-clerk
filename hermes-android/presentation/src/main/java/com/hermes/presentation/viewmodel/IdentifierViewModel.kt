@@ -28,6 +28,9 @@ class IdentifierViewModel @Inject constructor(
     private val _operationState = MutableStateFlow<OperationState>(OperationState.Idle)
     val operationState: StateFlow<OperationState> = _operationState.asStateFlow()
 
+    private val _deleteCheckState = MutableStateFlow<DeleteCheckState>(DeleteCheckState.Idle)
+    val deleteCheckState: StateFlow<DeleteCheckState> = _deleteCheckState.asStateFlow()
+
     init {
         loadIdentifiers()
     }
@@ -75,6 +78,32 @@ class IdentifierViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 检查是否可以删除标识（获取绑定账号信息）
+     *
+     * @param identifierId 标识ID
+     */
+    fun checkDeleteState(identifierId: Long) {
+        viewModelScope.launch {
+            _deleteCheckState.value = DeleteCheckState.Loading
+            try {
+                val boundCount = deleteIdentifierUseCase.getBoundAccountCount(identifierId)
+                if (boundCount > 0) {
+                    val boundAccounts = deleteIdentifierUseCase.getBoundAccounts(identifierId)
+                    _deleteCheckState.value = DeleteCheckState.HasBindings(
+                        identifierId = identifierId,
+                        boundCount = boundCount,
+                        boundAccounts = boundAccounts
+                    )
+                } else {
+                    _deleteCheckState.value = DeleteCheckState.CanDelete(identifierId)
+                }
+            } catch (e: Exception) {
+                _deleteCheckState.value = DeleteCheckState.Error(e.message ?: "Failed to check delete state")
+            }
+        }
+    }
+
     fun deleteIdentifier(identifierId: Long) {
         viewModelScope.launch {
             _operationState.value = OperationState.InProgress
@@ -100,17 +129,14 @@ class IdentifierViewModel @Inject constructor(
     fun resetOperationState() {
         _operationState.value = OperationState.Idle
     }
+
+    fun resetDeleteCheckState() {
+        _deleteCheckState.value = DeleteCheckState.Idle
+    }
 }
 
 sealed class IdentifierListState {
     object Loading : IdentifierListState()
     data class Success(val items: List<IdentifierListItem>) : IdentifierListState()
     data class Error(val message: String) : IdentifierListState()
-}
-
-sealed class OperationState {
-    object Idle : OperationState()
-    object InProgress : OperationState()
-    data class Success(val message: String) : OperationState()
-    data class Error(val message: String) : OperationState()
 }

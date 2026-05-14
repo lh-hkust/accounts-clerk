@@ -18,10 +18,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hermes.domain.valueobject.IdentifierStatus
 import com.hermes.domain.valueobject.IdentifierType
+import com.hermes.presentation.ui.component.DeleteIdentifierBlockDialog
+import com.hermes.presentation.ui.component.DeleteIdentifierConfirmDialog
 import com.hermes.presentation.ui.component.IdentifierCard
 import com.hermes.presentation.ui.theme.HermesColors
 import com.hermes.presentation.usecase.identifier.IdentifierListItem
 import com.hermes.presentation.viewmodel.IdentifierListState
+import com.hermes.presentation.viewmodel.DeleteCheckState
 
 /**
  * 标识列表页面（支持卡片手势交互）
@@ -29,6 +32,7 @@ import com.hermes.presentation.viewmodel.IdentifierListState
 @Composable
 fun IdentifierListScreen(
     uiState: IdentifierListState,
+    deleteCheckState: DeleteCheckState = DeleteCheckState.Idle,
     onIdentifierClick: (Long) -> Unit,
     onAddClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -37,9 +41,41 @@ fun IdentifierListScreen(
     onModifyReminder: (Long) -> Unit = {},
     onCancelReminder: (Long) -> Unit = {},
     onMarkDeactivated: (Long) -> Unit = {},
-    onDeleteIdentifier: (Long) -> Unit = {},
+    onCheckDelete: (Long) -> Unit = {},
+    onConfirmDelete: (Long) -> Unit = {},
+    onViewBoundAccounts: (Long) -> Unit = {},
+    onAccountClick: (Long) -> Unit = {},
+    onResetDeleteCheckState: () -> Unit = {},
     onMarkHandled: (Long) -> Unit = {}
 ) {
+    // 删除弹窗状态
+    var showBlockDialog by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
+    var pendingDeleteId by remember { mutableStateOf<Long?>(null) }
+    var pendingDeleteValue by remember { mutableStateOf("") }
+
+    // 处理删除检查状态
+    LaunchedEffect(deleteCheckState) {
+        when (deleteCheckState) {
+            is DeleteCheckState.HasBindings -> {
+                showBlockDialog = true
+            }
+            is DeleteCheckState.CanDelete -> {
+                showConfirmDialog = true
+                pendingDeleteId = deleteCheckState.identifierId
+            }
+            else -> {}
+        }
+    }
+
+    // 获取要删除的标识值（从列表中查找）
+    LaunchedEffect(uiState, pendingDeleteId) {
+        if (pendingDeleteId != null && uiState is IdentifierListState.Success) {
+            val item = uiState.items.find { it.identifier.id == pendingDeleteId }
+            pendingDeleteValue = item?.identifier?.value ?: ""
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -71,7 +107,7 @@ fun IdentifierListScreen(
                                 onModifyReminder = { onModifyReminder(identifierId) },
                                 onCancelReminder = { onCancelReminder(identifierId) },
                                 onMarkDeactivated = { onMarkDeactivated(identifierId) },
-                                onDelete = { onDeleteIdentifier(identifierId) },
+                                onDelete = { onCheckDelete(identifierId) },
                                 onMarkHandled = { onMarkHandled(identifierId) }
                             )
                         }
@@ -87,5 +123,34 @@ fun IdentifierListScreen(
                 }
             }
         }
+    }
+
+    // 删除阻止弹窗（有绑定账号）
+    if (showBlockDialog && deleteCheckState is DeleteCheckState.HasBindings) {
+        DeleteIdentifierBlockDialog(
+            boundAccountCount = deleteCheckState.boundCount,
+            boundAccounts = deleteCheckState.boundAccounts,
+            onDismiss = {
+                showBlockDialog = false
+                onResetDeleteCheckState()
+            },
+            onViewBoundAccounts = { onViewBoundAccounts(deleteCheckState.identifierId) },
+            onAccountClick = onAccountClick
+        )
+    }
+
+    // 删除确认弹窗（无绑定账号）
+    if (showConfirmDialog) {
+        DeleteIdentifierConfirmDialog(
+            identifierValue = pendingDeleteValue,
+            onDismiss = {
+                showConfirmDialog = false
+                onResetDeleteCheckState()
+            },
+            onConfirm = {
+                pendingDeleteId?.let { onConfirmDelete(it) }
+                showConfirmDialog = false
+            }
+        )
     }
 }

@@ -13,6 +13,7 @@ interface IdentifierBindingRepository {
     suspend fun checkDuplicate(accountId: Long, identifierId: Long): Boolean
     suspend fun getCountByIdentifierId(identifierId: Long): Int
     suspend fun deleteByAccountAndIdentifier(accountId: Long, identifierId: Long)
+    suspend fun deleteByAccountId(accountId: Long)
     suspend fun updatePurposes(id: Long, purposes: List<BindingPurpose>)
     suspend fun switchIdentifier(accountId: Long, oldIdentifierId: Long, newIdentifierId: Long)
     suspend fun deleteAll()

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.hermes.presentation.usecase.identifier.GetIdentifierDetailUseCase
 import com.hermes.presentation.usecase.identifier.DeleteIdentifierUseCase
 import com.hermes.presentation.usecase.identifier.IdentifierDetail
+import com.hermes.presentation.usecase.identifier.BoundAccountInfo
 import com.hermes.presentation.usecase.deactivation.GetDeactivationDetailUseCase
 import com.hermes.presentation.usecase.deactivation.CancelDeactivationUseCase
 import com.hermes.presentation.usecase.deactivation.DeactivationDetail
@@ -39,6 +40,9 @@ class IdentifierDetailViewModel @Inject constructor(
     private val _deactivationDetail = MutableStateFlow<DeactivationDetail?>(null)
     val deactivationDetail: StateFlow<DeactivationDetail?> = _deactivationDetail.asStateFlow()
 
+    private val _deleteCheckState = MutableStateFlow<DeleteCheckState>(DeleteCheckState.Idle)
+    val deleteCheckState: StateFlow<DeleteCheckState> = _deleteCheckState.asStateFlow()
+
     fun loadIdentifierDetail(identifierId: Long) {
         viewModelScope.launch {
             _uiState.value = IdentifierDetailState.Loading
@@ -55,6 +59,32 @@ class IdentifierDetailViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _uiState.value = IdentifierDetailState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    /**
+     * 检查是否可以删除标识（获取绑定账号信息）
+     *
+     * @param identifierId 标识ID
+     */
+    fun checkDeleteState(identifierId: Long) {
+        viewModelScope.launch {
+            _deleteCheckState.value = DeleteCheckState.Loading
+            try {
+                val boundCount = deleteIdentifierUseCase.getBoundAccountCount(identifierId)
+                if (boundCount > 0) {
+                    val boundAccounts = deleteIdentifierUseCase.getBoundAccounts(identifierId)
+                    _deleteCheckState.value = DeleteCheckState.HasBindings(
+                        identifierId = identifierId,
+                        boundCount = boundCount,
+                        boundAccounts = boundAccounts
+                    )
+                } else {
+                    _deleteCheckState.value = DeleteCheckState.CanDelete(identifierId)
+                }
+            } catch (e: Exception) {
+                _deleteCheckState.value = DeleteCheckState.Error(e.message ?: "Failed to check delete state")
             }
         }
     }
@@ -103,6 +133,10 @@ class IdentifierDetailViewModel @Inject constructor(
 
     fun resetOperationState() {
         _operationState.value = OperationState.Idle
+    }
+
+    fun resetDeleteCheckState() {
+        _deleteCheckState.value = DeleteCheckState.Idle
     }
 }
 
