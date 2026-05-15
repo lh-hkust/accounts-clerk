@@ -260,5 +260,6 @@ data class IdentifierOption(
     val id: Long,
     val type: IdentifierType,
     val value: String,
-    val status: com.hermes.domain.valueobject.IdentifierStatus
+    val status: com.hermes.domain.valueobject.IdentifierStatus,
+    val createdAt: java.time.Instant = java.time.Instant.now() // 用于组内排序（newest first）
 )

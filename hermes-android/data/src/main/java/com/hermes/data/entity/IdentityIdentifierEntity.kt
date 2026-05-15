@@ -25,6 +25,7 @@ data class IdentityIdentifierEntity(
     val status: String = "ACTIVE",
     val plannedDeactTime: Long? = null,
     val deactReason: String? = null,
+    val remark: String? = null,
     val createdAt: Long,
     val updatedAt: Long
 ) {
@@ -36,6 +37,7 @@ data class IdentityIdentifierEntity(
             status = IdentifierStatus.valueOf(status),
             plannedDeactTime = plannedDeactTime?.let { java.time.Instant.ofEpochMilli(it) },
             deactReason = deactReason,
+            remark = remark,
             createdAt = java.time.Instant.ofEpochMilli(createdAt),
             updatedAt = java.time.Instant.ofEpochMilli(updatedAt)
         )
@@ -50,6 +52,7 @@ data class IdentityIdentifierEntity(
                 status = model.status.name,
                 plannedDeactTime = model.plannedDeactTime?.toEpochMilli(),
                 deactReason = model.deactReason,
+                remark = model.remark,
                 createdAt = model.createdAt.toEpochMilli(),
                 updatedAt = model.updatedAt.toEpochMilli()
             )

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,9 +13,11 @@ import androidx.compose.ui.unit.dp
 import com.hermes.presentation.ui.theme.HermesColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import java.time.Instant
 
 /**
- * 设置停用计划页面
+ * 设置停用计划页面（集成DatePickerDialog）
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,11 +25,28 @@ fun ScheduleDeactivationScreen(
     identifierId: Long,
     onBackClick: () -> Unit,
     onScheduled: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    initialDate: LocalDate? = null,
+    onDateSelected: (LocalDate, com.hermes.domain.valueobject.DeactivationType, String?) -> Unit = { _, _, _ -> }
 ) {
-    var selectedDate by remember { mutableStateOf(LocalDate.now().plusDays(30)) }
+    var selectedDate by remember { mutableStateOf(initialDate ?: LocalDate.now().plusDays(30)) }
     var reason by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf(com.hermes.domain.valueobject.DeactivationType.OTHER) }
+
+    // DatePickerDialog状态
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    // DatePicker状态
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                // 只允许选择今天之后的日期
+                val today = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                return utcTimeMillis >= today
+            }
+        }
+    )
 
     Scaffold(
         modifier = modifier,
@@ -65,12 +85,18 @@ fun ScheduleDeactivationScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // 日期选择器占位
+                    // 日期选择器按钮 - 点击打开DatePickerDialog
                     val formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日")
                     OutlinedButton(
-                        onClick = { /* TODO: DatePickerDialog */ },
+                        onClick = { showDatePicker = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        Icon(
+                            imageVector = Icons.Filled.EditCalendar,
+                            contentDescription = "选择日期",
+                            tint = HermesColors.Primary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(selectedDate.format(formatter))
                     }
 
@@ -160,7 +186,10 @@ fun ScheduleDeactivationScreen(
 
             // 确认按钮
             Button(
-                onClick = onScheduled,
+                onClick = {
+                    onDateSelected(selectedDate, selectedType, if (reason.isNotEmpty()) reason else null)
+                    onScheduled()
+                },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = HermesColors.Warning
@@ -168,6 +197,40 @@ fun ScheduleDeactivationScreen(
             ) {
                 Text("确认设置")
             }
+        }
+    }
+
+    // DatePickerDialog
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDatePicker = false
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            selectedDate = Instant.ofEpochMilli(millis)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                        }
+                    }
+                ) {
+                    Text("确定", color = HermesColors.Primary)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDatePicker = false }
+                ) {
+                    Text("取消", color = HermesColors.TextSecondary)
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState,
+                showModeToggle = false,
+                title = { Text("选择到期日期", color = HermesColors.TextPrimary) }
+            )
         }
     }
 }

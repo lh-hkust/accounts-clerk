@@ -20,6 +20,7 @@ import com.hermes.domain.valueobject.IdentifierStatus
 import com.hermes.domain.valueobject.IdentifierType
 import com.hermes.presentation.ui.theme.HermesColors
 import com.hermes.presentation.usecase.identifier.IdentifierListItem
+// Note: getStatusColor and getStatusText functions are defined in StatusMapping.kt in the same package
 
 /**
  * 标识卡片组件（支持手势交互）
@@ -43,7 +44,7 @@ fun IdentifierCard(
     onDelete: () -> Unit = {},
     onMarkHandled: () -> Unit = {}
 ) {
-    val statusColor = getStatusColor(item.identifier.status)
+    val statusColor = getIdentifierStatusColor(item.identifier.status)
     val typeColor = getTypeColor(item.identifier.type)
 
     // 菜单显示状态
@@ -110,7 +111,7 @@ fun IdentifierCard(
                                 color = statusColor
                             ) {
                                 Text(
-                                    text = getStatusText(item.identifier.status),
+                                    text = getIdentifierStatusText(item.identifier.status),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = HermesColors.TextPrimary,
                                     modifier = Modifier.padding(horizontal = 6.dp)
@@ -178,24 +179,6 @@ fun IdentifierCard(
                 onDismiss = { showMenu = false }
             )
         }
-    }
-}
-
-private fun getStatusColor(status: IdentifierStatus): Color {
-    return when (status) {
-        IdentifierStatus.ACTIVE -> HermesColors.Success
-        IdentifierStatus.PENDING_DEACTIVATION -> HermesColors.Warning
-        IdentifierStatus.DEACTIVATED -> HermesColors.Danger
-        IdentifierStatus.INVALIDATED -> HermesColors.TextMuted
-    }
-}
-
-private fun getStatusText(status: IdentifierStatus): String {
-    return when (status) {
-        IdentifierStatus.ACTIVE -> "正常使用"
-        IdentifierStatus.PENDING_DEACTIVATION -> "即将到期"
-        IdentifierStatus.DEACTIVATED -> "已失效"
-        IdentifierStatus.INVALIDATED -> "已失效"
     }
 }
 

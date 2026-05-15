@@ -21,6 +21,7 @@ class IdentityIdentifier(
     var status: IdentifierStatus = IdentifierStatus.ACTIVE,
     var plannedDeactTime: Instant? = null,
     var deactReason: String? = null,
+    var remark: String? = null,
     val createdAt: Instant,
     var updatedAt: Instant
 ) {
@@ -90,6 +91,16 @@ class IdentityIdentifier(
      */
     fun invalidate() {
         status = IdentifierStatus.INVALIDATED
+        updatedAt = Instant.now()
+    }
+
+    /**
+     * 更新备注
+     *
+     * @param newRemark 新备注内容
+     */
+    fun updateRemark(newRemark: String?) {
+        remark = newRemark
         updatedAt = Instant.now()
     }
 

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.hermes.domain.valueobject.AccountStatus
 import com.hermes.presentation.ui.theme.HermesColors
 import com.hermes.presentation.usecase.account.AccountListItem
+// Note: getAccountStatusColor and getAccountStatusText are defined in StatusMapping.kt in the same package
 
 /**
  * 账户卡片组件（支持手势交互）
@@ -148,24 +149,6 @@ fun AccountCard(
                 onDismiss = { showMenu = false }
             )
         }
-    }
-}
-
-private fun getAccountStatusColor(status: AccountStatus): Color {
-    return when (status) {
-        AccountStatus.ACTIVE -> HermesColors.Success
-        AccountStatus.FROZEN -> HermesColors.Info
-        AccountStatus.LOST -> HermesColors.Warning
-        AccountStatus.ARCHIVED -> HermesColors.TextMuted
-    }
-}
-
-private fun getAccountStatusText(status: AccountStatus): String {
-    return when (status) {
-        AccountStatus.ACTIVE -> "活跃"
-        AccountStatus.FROZEN -> "冻结"
-        AccountStatus.LOST -> "丢失"
-        AccountStatus.ARCHIVED -> "归档"
     }
 }
 

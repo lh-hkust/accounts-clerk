@@ -1,3 +1,40 @@
+### Requirement: User can add account without binding verification channel
+
+The system SHALL allow account creation without mandatory binding to verification channels. Binding is optional, not required.
+
+#### Scenario: Add account without binding
+- **WHEN** user adds account with accountName and accountIdentifier
+- **AND** user does not select any verification channel
+- **AND** user clicks "Save"
+- **THEN** system creates ApplicationAccount entity
+- **AND** account has empty binding list
+- **AND** account list displays "未绑定渠道" status indicator
+
+#### Scenario: Add account with binding (normal flow)
+- **WHEN** user selects a verification channel
+- **AND** user selects binding purposes
+- **THEN** system creates account with binding relationship
+- **AND** binding status displays in account detail
+
+### Requirement: Add Account screen provides shortcut to add verification channel
+
+The system SHALL provide quick navigation to Add Identifier screen when user needs a new verification channel.
+
+#### Scenario: No available channels prompt
+- **WHEN** user is on Add Account screen
+- **AND** available identifier list is empty
+- **THEN** system displays prompt: "暂无可用验证渠道"
+- **AND** displays action: "点击添加验证渠道"
+- **AND** clicking prompt navigates to Add Identifier screen
+
+#### Scenario: Add channel button in channel section
+- **WHEN** available identifier list has items
+- **THEN** system displays "+ 添加渠道" button at end of channel list
+- **AND** clicking button navigates to Add Identifier screen
+- **AND** after adding, user returns to Add Account screen with new channel available
+
+---
+
 ## ADDED Requirements
 
 ### Requirement: User can add application account
@@ -44,6 +81,15 @@ The system SHALL allow users to bind identity identifiers when adding a new acco
 - **THEN** system default selects "VERIFICATION" purpose
 - **AND** user can modify purpose selection
 
+#### Scenario: Bind multiple identifiers when adding account (新增 2026-05-15)
+- **WHEN** user adds account and selects multiple identifiers ["13812345678", "test@qq.com"]
+- **AND** user selects purposes for each identifier
+- **AND** user clicks "Save"
+- **THEN** system creates ApplicationAccount entity
+- **AND** system creates multiple IdentifierBinding entities
+- **AND** each binding has its own purposes
+- **AND** account detail page displays all bound identifiers with their purposes
+
 #### Scenario: Identifier list display and sorting
 - **WHEN** user views available identifiers for binding
 - **THEN** system displays identifiers grouped by status
@@ -82,22 +128,26 @@ The system SHALL allow users to edit account information including accountName, 
 - **THEN** system displays error "Account identifier already exists"
 - **AND** system does NOT update
 
-### Requirement: User can delete account with confirmation
+### Requirement: User can delete account with simple confirmation
 
-The system SHALL allow users to delete accounts. Deletion SHALL require confirmation with anti-mistake input. Account bindings SHALL be automatically deleted when account is deleted.
+The system SHALL allow users to delete accounts. Deletion SHALL require simple confirmation dialog showing account info and impact. Account bindings SHALL be automatically deleted when account is deleted.
 
-#### Scenario: Delete account with confirmation
+#### Scenario: Delete account confirmation dialog
 - **WHEN** user triggers delete action (long-press menu or left-swipe)
 - **THEN** system displays confirmation dialog
+- **AND** dialog title: "确认删除账号？"
 - **AND** dialog shows account name "微博 - 工作小号01"
-- **AND** user must input account nickname "工作小号01" to confirm
-- **AND** after correct input, delete button becomes enabled
+- **AND** dialog shows impact message: "将解绑 2 个验证渠道"
+- **AND** dialog shows warning: "此操作不可撤销"
+- **AND** primary button: "确认删除" (danger color)
+- **AND** secondary button: "取消"
 
-#### Scenario: Delete account with bindings
-- **WHEN** user confirms deletion of account with 3 bindings
+#### Scenario: Delete account execution
+- **WHEN** user clicks "确认删除" in confirmation dialog
 - **THEN** system deletes ApplicationAccount entity
 - **AND** system deletes all related IdentifierBinding entities
 - **AND** system creates BindingHistoryRecord for each unbind action
+- **AND** system returns to account list page
 
 ### Requirement: User can view account list
 
@@ -168,3 +218,41 @@ The system SHALL allow users to add custom extension fields to accounts. Field k
 - **WHEN** user adds extension with key="register_date" and extension with same key already exists for account
 - **THEN** system displays error "Extension key already exists"
 - **AND** system does NOT create new extension
+
+### Requirement: Account list displays empty state with guidance
+
+The system SHALL display helpful empty state UI when account list has no items.
+
+#### Scenario: Empty account list
+- **WHEN** account list has zero items
+- **THEN** system displays empty state card
+- **AND** card shows: "暂无账号记录"
+- **AND** card shows: "添加常用应用账号，建立与验证渠道的绑定关系"
+- **AND** provides "添加账号" button
+
+### Requirement: Account search empty result displays friendly feedback
+
+The system SHALL display helpful message when search yields no results.
+
+#### Scenario: No search results
+- **WHEN** user searches in Account list
+- **AND** search query matches zero items
+- **THEN** system displays: "未找到匹配结果"
+- **AND** displays suggestion: "请尝试其他关键词"
+- **AND** clears search query after 2 seconds automatically
+
+### Requirement: Account detail page displays only domain model fields
+
+The system SHALL only display fields that exist in domain model or can be derived.
+
+#### Scenario: Display account info
+- **WHEN** user views Account Detail screen
+- **THEN** system displays: accountName, accountIdentifier, nickname, status
+- **AND** system displays derived info: binding count, createdAt, updatedAt
+- **AND** system does NOT display non-existent fields (e.g., "最后登录", "长期在线")
+
+#### Scenario: Related account navigation
+- **WHEN** user clicks related account item in Account Detail screen
+- **THEN** system navigates to clicked account's detail screen
+- **AND** back button returns to previous account detail (not account list)
+- **AND** navigation stack maintains proper order

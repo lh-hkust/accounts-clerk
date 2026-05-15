@@ -2,13 +2,17 @@ package com.hermes.presentation.usecase.identifier
 
 import com.hermes.domain.repository.IdentityIdentifierRepository
 import com.hermes.domain.repository.IdentifierBindingRepository
+import com.hermes.domain.repository.ApplicationAccountRepository
+import com.hermes.domain.repository.ApplicationRepository
 
 /**
  * 删除身份标识用例
  */
 class DeleteIdentifierUseCase(
     private val identifierRepository: IdentityIdentifierRepository,
-    private val bindingRepository: IdentifierBindingRepository
+    private val bindingRepository: IdentifierBindingRepository,
+    private val accountRepository: ApplicationAccountRepository,
+    private val applicationRepository: ApplicationRepository
 ) {
     /**
      * 删除标识
@@ -37,5 +41,38 @@ class DeleteIdentifierUseCase(
     suspend fun canDelete(identifierId: Long): Boolean {
         val boundCount = bindingRepository.getCountByIdentifierId(identifierId)
         return boundCount == 0
+    }
+
+    /**
+     * 获取绑定账号数量
+     *
+     * @param identifierId 标识ID
+     * @return 绑定账号数量
+     */
+    suspend fun getBoundAccountCount(identifierId: Long): Int {
+        return bindingRepository.getCountByIdentifierId(identifierId)
+    }
+
+    /**
+     * 获取绑定的账号列表
+     *
+     * @param identifierId 标识ID
+     * @return 绑定账号信息列表（来自GetIdentifierDetailUseCase的BoundAccountInfo）
+     */
+    suspend fun getBoundAccounts(identifierId: Long): List<BoundAccountInfo> {
+        val bindings = bindingRepository.getByIdentifierId(identifierId)
+        return bindings.map { binding ->
+            val account = accountRepository.getById(binding.accountId)
+            val application = account?.let { applicationRepository.getById(it.applicationId) }
+            BoundAccountInfo(
+                accountId = binding.accountId,
+                accountName = account?.nickname ?: account?.accountName ?: "",
+                accountIdentifier = account?.accountIdentifier,
+                applicationName = application?.name ?: "",
+                applicationIconUrl = application?.iconUrl,
+                purposes = binding.purposes,
+                isPrimary = binding.isPrimary
+            )
+        }
     }
 }

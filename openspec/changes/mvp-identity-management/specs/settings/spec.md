@@ -1,5 +1,21 @@
 ## ADDED Requirements
 
+### Requirement: MVP single-device mode scope definition
+
+The system SHALL operate as single-device local application with clearly defined boundaries for MVP version.
+
+#### Scenario: No login/logout feature
+- **WHEN** MVP version runs
+- **THEN** system does NOT provide login/logout functionality
+- **AND** Settings screen user profile displays "本地用户（单机版）"
+- **AND** no "退出登录" button available
+- **AND** clicking user profile displays: "数据仅保存在本设备，云同步功能敬请期待"
+
+#### Scenario: Data persistence guarantee
+- **WHEN** user closes and restarts app
+- **THEN** all data remains intact locally
+- **AND** no cloud sync feature available in MVP
+
 ### Requirement: Settings page indicates single-user local mode
 
 The system SHALL indicate current version is single-user local mode. Cloud sync feature SHALL be indicated as planned for future release.
@@ -13,6 +29,24 @@ The system SHALL indicate current version is single-user local mode. Cloud sync 
 - **WHEN** user clicks "Logout" button
 - **THEN** system displays dialog "当前为单机版本，退出功能将在云版本中提供"
 - **AND** dialog has "确定" button to close
+
+### Requirement: Notification settings provides clear explanation
+
+The system SHALL display notification content, trigger conditions, and timing clearly in Notification Settings.
+
+#### Scenario: Notification timing explanation
+- **WHEN** user views Notification Settings screen
+- **THEN** each timing option displays explanation:
+  - "提前30天提醒": "渠道到期前30天发送首次提醒"
+  - "提前7天提醒": "渠道到期前7天发送加强提醒"
+  - "提前3天提醒": "渠道到期前3天发送紧急提醒"
+  - "提前1天提醒": "渠道到期前1天发送最终提醒"
+- **AND** notification method indicated: "系统通知"
+
+#### Scenario: Notification content preview
+- **WHEN** user clicks timing option row
+- **THEN** system displays notification content preview
+- **AND** preview shows: "【Hermes提醒】您的手机号 138****8000 将于X天后到期，关联Y个账号，请及时处理。"
 
 ### Requirement: About dialog displays application info
 
@@ -30,6 +64,32 @@ The system SHALL display application name, semantic version number (no 'v' prefi
 #### Scenario: Check update
 - **WHEN** user clicks "Check Update" button in About dialog
 - **THEN** system displays "当前已是最新版本" or update info if available
+
+### Requirement: Privacy security settings provides comprehensive transparency
+
+The system SHALL display complete privacy, permission, and data security information for user transparency.
+
+#### Scenario: Privacy statement section
+- **WHEN** user views Privacy Security screen
+- **THEN** system displays "数据安全说明" section
+- **AND** section contains:
+  - "所有数据仅存储于本设备，不上传云端"
+  - "数据库采用AES-256加密存储"
+  - "导出文件可选择加密保护"
+
+#### Scenario: System permissions section
+- **WHEN** user views Privacy Security screen
+- **THEN** system displays "系统权限" section
+- **AND** each permission displays with purpose:
+  - "文件访问": "用于数据导入/导出文件读写" (必要)
+  - "生物识别": "用于指纹/面容快速解锁应用" (可选)
+  - "通知推送": "用于到期提醒及时送达" (可选)
+- **AND** permissions clearly marked as "必要" or "可选"
+
+#### Scenario: Third-party sharing statement
+- **WHEN** user views Privacy Security screen
+- **THEN** system displays: "本应用不与任何第三方共享数据"
+- **AND** displays: "无广告、无追踪、无数据分析"
 
 ### Requirement: Privacy security settings page
 

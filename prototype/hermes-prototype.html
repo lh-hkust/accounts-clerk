@@ -659,6 +659,60 @@
             </div>
         </div>
 
+        <!-- Dashboard Empty State Page -->
+        <div id="page-dashboard-empty" class="page">
+            <div class="pt-6 pb-4">
+                <div class="mb-6">
+                    <h1 class="text-white font-bold">账号概览</h1>
+                </div>
+
+                <div class="card card-gradient p-6 mb-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                        <i class="fa-solid fa-shield text-blue-400 text-2xl"></i>
+                    </div>
+                    <p class="text-white font-semibold mb-2">暂无数据</p>
+                    <p class="text-gray-400 text-sm mb-4">添加验证渠道开始保护账号</p>
+                    <button class="btn-primary w-full" onclick="goToPage('page-credentials')">立即添加</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="card p-4 cursor-pointer" onclick="goToPage('page-credentials')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                <i class="fa-solid fa-shield text-blue-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-semibold">验证渠道</h3>
+                                <p class="text-gray-400 text-xs">0 个</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-4 cursor-pointer" onclick="goToPage('page-accounts')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                                <i class="fa-solid fa-box text-purple-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-semibold">账号</h3>
+                                <p class="text-gray-400 text-xs">0 个</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-bell text-gray-400"></i>
+                        <span class="text-white font-semibold">提醒</span>
+                    </div>
+                </div>
+
+                <div class="card p-4 text-center">
+                    <p class="text-gray-500 text-sm">暂无提醒</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Credentials Page -->
         <div id="page-credentials" class="page">
             <div class="pt-6 pb-4">
@@ -775,6 +829,30 @@
             </div>
         </div>
 
+        <!-- Credentials Empty State Page -->
+        <div id="page-credentials-empty" class="page">
+            <div class="pt-6 pb-4">
+                <div class="flex items-center gap-4 mb-6">
+                    <button class="p-2 -ml-2" onclick="goToPage('page-dashboard')">
+                        <i class="fa-solid fa-chevron-left text-white"></i>
+                    </button>
+                    <h1 class="text-white font-bold">验证渠道</h1>
+                </div>
+
+                <div class="card p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                        <i class="fa-solid fa-shield text-blue-400 text-2xl"></i>
+                    </div>
+                    <p class="text-white font-semibold mb-2">暂无验证渠道</p>
+                    <p class="text-gray-400 text-sm mb-4">添加手机号或邮箱，开始追踪账号绑定关系</p>
+                    <button class="btn-primary w-full" onclick="showModal('modal-add-credential')">添加验证渠道</button>
+                </div>
+            </div>
+            <div class="fab-button" onclick="showModal('modal-add-credential')">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+        </div>
+
         <!-- Credential Detail Page -->
         <div id="page-credential-detail" class="page">
             <div class="pt-6 pb-4">
@@ -865,7 +943,7 @@
         <div id="page-accounts" class="page">
             <div class="pt-6 pb-4">
                 <div class="flex items-center justify-between mb-6">
-                    <h1 class="text-white font-bold">账号资产库</h1>
+                    <h1 class="text-white font-bold">账号</h1>
                     <button class="text-blue-400 text-sm font-semibold" onclick="showModal('modal-add-account')">+ 添加</button>
                 </div>
 
@@ -944,6 +1022,30 @@
             </div>
         </div>
 
+        <!-- Accounts Empty State Page -->
+        <div id="page-accounts-empty" class="page">
+            <div class="pt-6 pb-4">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-white font-bold">账号</h1>
+                    <button class="text-blue-400 text-sm font-semibold" onclick="showModal('modal-add-account')">+ 添加</button>
+                </div>
+
+                <div class="input-field mb-6">
+                    <i class="fa-solid fa-search text-gray-500 mr-2"></i>
+                    <input type="text" placeholder="搜索账号、应用或备注..." class="bg-transparent border-none outline-none text-white placeholder-gray-500" />
+                </div>
+
+                <div class="card p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                        <i class="fa-solid fa-box text-blue-400 text-2xl"></i>
+                    </div>
+                    <p class="text-white font-semibold mb-2">暂无账号记录</p>
+                    <p class="text-gray-400 text-sm mb-4">添加常用应用账号，建立与验证渠道的绑定关系</p>
+                    <button class="btn-primary w-full" onclick="showModal('modal-add-account')">添加账号</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Account Detail Page -->
         <div id="page-account-detail" class="page">
             <div class="pt-6 pb-4">
@@ -970,12 +1072,12 @@
                             <span class="text-white">hrm_2026_dev</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-400 text-sm">最后登录</span>
-                            <span class="text-white">2026-05-07</span>
+                            <span class="text-gray-400 text-sm">备注</span>
+                            <span class="text-white">个人主账号</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-400 text-sm">长期在线</span>
-                            <span class="text-green-400">已开启</span>
+                            <span class="text-gray-400 text-sm">添加日期</span>
+                            <span class="text-white">2025-01-15</span>
                         </div>
                     </div>
                 </div>
@@ -1087,7 +1189,9 @@
                     </button>
                 </div>
 
-                <button class="btn-secondary w-full text-red-400 border-red-500/30" onclick="showModal('modal-single-user')">退出登录</button>
+                <!-- MVP单机版本无退出登录功能 -->
+            </div>
+        </div>
             </div>
         </div>
 
@@ -1105,31 +1209,47 @@
                     <h3 class="text-white font-semibold mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-clock text-blue-400"></i>到期提醒
                     </h3>
+                    <p class="text-gray-500 text-xs mb-4">渠道到期前自动发送提醒通知，通知方式：系统通知</p>
                     <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-400 text-sm">提前30天提醒</span>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">提前30天提醒</p>
+                                <p class="text-gray-600 text-xs mt-1">渠道到期前30天发送首次提醒</p>
+                            </div>
                             <div class="w-12 h-6 bg-green-500 rounded-full relative">
                                 <div class="w-5 h-5 bg-white rounded-full absolute right-1 top-0.5"></div>
                             </div>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-400 text-sm">提前7天提醒</span>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">提前7天提醒</p>
+                                <p class="text-gray-600 text-xs mt-1">渠道到期前7天发送加强提醒</p>
+                            </div>
                             <div class="w-12 h-6 bg-green-500 rounded-full relative">
                                 <div class="w-5 h-5 bg-white rounded-full absolute right-1 top-0.5"></div>
                             </div>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-400 text-sm">提前3天提醒</span>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">提前3天提醒</p>
+                                <p class="text-gray-600 text-xs mt-1">渠道到期前3天发送紧急提醒</p>
+                            </div>
                             <div class="w-12 h-6 bg-green-500 rounded-full relative">
                                 <div class="w-5 h-5 bg-white rounded-full absolute right-1 top-0.5"></div>
                             </div>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-400 text-sm">提前1天提醒</span>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-gray-400 text-sm">提前1天提醒</p>
+                                <p class="text-gray-600 text-xs mt-1">渠道到期前1天发送最终提醒</p>
+                            </div>
                             <div class="w-12 h-6 bg-gray-600 rounded-full relative">
                                 <div class="w-5 h-5 bg-white rounded-full absolute left-1 top-0.5"></div>
                             </div>
                         </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-800">
+                        <p class="text-gray-500 text-xs">通知内容预览：您的手机号 138****8000 将于X天后到期，关联Y个账号，请及时处理。</p>
                     </div>
                 </div>
 
@@ -1266,6 +1386,34 @@
                                 <p class="text-gray-500 text-xs mt-1">用于到期提醒推送</p>
                             </div>
                             <span class="badge badge-muted">可选</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-6 p-4">
+                    <h3 class="text-white font-semibold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-database text-blue-400"></i>数据安全说明
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <p class="text-gray-400 text-sm">所有数据仅存储于本设备，不上传云端</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <p class="text-gray-400 text-sm">数据库采用AES-256加密存储</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-green-400 mt-1"></i>
+                            <p class="text-gray-400 text-sm">导出文件可选择加密保护</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-times text-red-400 mt-1"></i>
+                            <p class="text-gray-400 text-sm">不与任何第三方共享数据</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fa-solid fa-times text-red-400 mt-1"></i>
+                            <p class="text-gray-400 text-sm">无广告、无追踪、无数据分析</p>
                         </div>
                     </div>
                 </div>
@@ -1436,7 +1584,7 @@
                         <span class="text-white">8 个</span>
                     </div>
                     <div class="flex justify-between text-xs mb-2">
-                        <span class="text-gray-400">账户数量</span>
+                        <span class="text-gray-400">账号</span>
                         <span class="text-white">312 个</span>
                     </div>
                     <div class="flex justify-between text-xs">
@@ -1553,7 +1701,8 @@
             <input type="text" placeholder="昵称（可选，用于列表显示）" class="input-field w-full mb-4" />
 
             <p class="text-gray-400 text-xs mb-3">绑定验证渠道</p>
-            <div class="card mb-3 p-3 border-blue-500/30">
+            <!-- 正常使用分组 -->
+            <div class="card mb-3 p-3 border-blue-500/30 cursor-pointer" onclick="showModal('modal-purpose-select')">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-mobile text-blue-400"></i>
@@ -1565,17 +1714,36 @@
                     </div>
                 </div>
             </div>
-            <div class="card mb-4 p-3">
+            <!-- 状态分隔线 -->
+            <hr class="border-gray-700 my-2" />
+            <!-- 即将到期分组 -->
+            <div class="card mb-3 p-3 cursor-pointer bg-orange-500/10" onclick="showModal('modal-purpose-select')">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-envelope text-gray-400"></i>
-                        <span class="text-gray-400">dev.hermes@gmail.com</span>
+                        <i class="fa-solid fa-envelope text-orange-400"></i>
+                        <span class="text-white">dev.hermes@gmail.com</span>
                     </div>
-                    <i class="fa-solid fa-circle text-gray-600"></i>
+                    <span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded">即将到期</span>
+                </div>
+            </div>
+            <!-- 已失效分组（默认折叠） -->
+            <hr class="border-gray-700 my-2" />
+            <p class="text-gray-500 text-xs cursor-pointer hover:text-gray-400 mb-3" onclick="this.nextElementSibling.style.display='block';this.style.display='none'">查看全部 (2)</p>
+            <div class="hidden">
+                <div class="card mb-3 p-3 cursor-pointer bg-gray-500/10" onclick="showModal('modal-purpose-select')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-mobile text-gray-500"></i>
+                            <span class="text-gray-500">159****5678</span>
+                        </div>
+                        <span class="text-xs bg-gray-500/20 text-gray-500 px-2 py-0.5 rounded">已失效</span>
+                    </div>
                 </div>
             </div>
 
-            <input type="text" placeholder="备注（可选）" class="input-field w-full mb-6" />
+            <input type="text" placeholder="备注（可选）" class="input-field w-full mb-4" />
+
+            <p class="text-blue-400 text-sm font-semibold text-center mb-4 cursor-pointer" onclick="showModal('modal-add-identifier')">+ 添加渠道</p>
 
             <div class="flex gap-3">
                 <button class="btn-secondary flex-1" onclick="closeModal('modal-add-account')">取消</button>
@@ -1960,18 +2128,19 @@
                 <h2 class="text-white font-bold">确认删除账号？</h2>
             </div>
 
-            <p class="text-gray-400 text-sm mb-2">账号：微博 - 工作小号01</p>
-            <p class="text-gray-500 text-xs mb-4">此操作不可撤销</p>
+            <p class="text-white text-sm mb-2">账号：微博 - 工作小号01</p>
+            <p class="text-gray-400 text-xs mb-4">将解绑 <span class="text-red-400 font-semibold">2</span> 个验证渠道</p>
 
-            <!-- Anti-mistake Input -->
-            <div class="mb-6">
-                <p class="text-gray-400 text-xs mb-2">请输入「工作小号01」确认删除</p>
-                <input type="text" id="delete-confirm-input" class="input-field w-full" placeholder="输入账号昵称" oninput="checkDeleteConfirm()" />
+            <div class="card p-3 mb-4 bg-yellow-500/10 border-yellow-500/20">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-exclamation-triangle text-yellow-400"></i>
+                    <p class="text-yellow-400 text-xs">此操作不可撤销</p>
+                </div>
             </div>
 
             <div class="flex gap-3">
                 <button class="btn-secondary flex-1" onclick="closeModal('modal-delete-account')">取消</button>
-                <button class="btn-primary flex-1 bg-gradient-to-r from-red-500 to-red-600 opacity-50" id="delete-confirm-btn" disabled>确认删除</button>
+                <button class="btn-primary flex-1 bg-gradient-to-r from-red-500 to-red-600" onclick="closeModal('modal-delete-account')">确认删除</button>
             </div>
         </div>
     </div>
@@ -2591,23 +2760,30 @@
 
         // Update data tools page buttons to show dialogs
         document.addEventListener('DOMContentLoaded', function() {
-            // Add click handlers for data tools buttons
-            const exportButtons = document.querySelectorAll('#page-data-tools .btn-secondary');
-            if (exportButtons.length > 0) {
-                // JSON export button
+            // Import buttons (indices 0-1: 导入JSON, 导入CSV)
+            const importButtons = document.querySelectorAll('#page-data-tools .card:nth-child(2) .btn-secondary');
+            if (importButtons.length >= 2) {
+                // Import JSON button
+                importButtons[0].addEventListener('click', function() {
+                    showModal('modal-import-preview');
+                });
+                // Import CSV button
+                importButtons[1].addEventListener('click', function() {
+                    showModal('modal-import-preview');
+                });
+            }
+
+            // Export buttons (indices 0-1: 导出JSON, 导出CSV in the export card)
+            const exportButtons = document.querySelectorAll('#page-data-tools .card:nth-child(4) .btn-secondary');
+            if (exportButtons.length >= 2) {
+                // JSON export button (triggers warning modal)
                 exportButtons[0].addEventListener('click', function() {
                     showModal('modal-export-warning');
                 });
-                // Secure export button - already handled
+                // CSV export button
                 exportButtons[1].addEventListener('click', function() {
-                    showModal('modal-secure-export');
+                    showModal('modal-export-warning');
                 });
-                // Import buttons
-                if (exportButtons[2]) {
-                    exportButtons[2].addEventListener('click', function() {
-                        showModal('modal-import-preview');
-                    });
-                }
             }
         });
     </script>

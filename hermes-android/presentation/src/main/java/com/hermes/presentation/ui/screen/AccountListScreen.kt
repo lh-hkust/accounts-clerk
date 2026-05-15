@@ -16,10 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hermes.domain.valueobject.AccountStatus
 import com.hermes.presentation.ui.component.AccountCard
+import com.hermes.presentation.ui.component.getAccountStatusText
+import com.hermes.presentation.ui.component.getAccountStatusColor
 import com.hermes.presentation.ui.theme.HermesColors
 import com.hermes.presentation.usecase.account.AccountListItem
 import com.hermes.presentation.viewmodel.AccountListState
@@ -127,15 +130,75 @@ fun AccountListScreen(
                 }
 
                 if (filteredItems.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                    // 空状态显示：区分"无数据"和"搜索无结果"
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            text = if (searchQuery.isEmpty()) "暂无账号" else "未找到匹配的账号",
-                            fontSize = 14.sp,
-                            color = HermesColors.TextMuted
-                        )
+                        if (searchQuery.isEmpty()) {
+                            // 23.1.3 真正的空状态：显示引导和操作按钮
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(containerColor = HermesColors.Surface)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(24.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Inventory2,
+                                        contentDescription = null,
+                                        tint = HermesColors.Primary.copy(alpha = 0.5f),
+                                        modifier = Modifier.size(48.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "暂无账号记录",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = HermesColors.TextPrimary
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "添加常用应用账号，建立与验证渠道的绑定关系",
+                                        fontSize = 12.sp,
+                                        color = HermesColors.TextSecondary,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Button(
+                                        onClick = onAddClick,
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = HermesColors.Primary
+                                        )
+                                    ) {
+                                        Icon(Icons.Filled.Add, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("添加账号", fontWeight = FontWeight.SemiBold)
+                                    }
+                                }
+                            }
+                        } else {
+                            // 23.1.4 搜索空结果友好提示
+                            Text(
+                                text = "未找到匹配结果",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = HermesColors.TextPrimary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "请尝试其他关键词",
+                                fontSize = 12.sp,
+                                color = HermesColors.TextSecondary,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 } else {
                     // 按应用分组 - 原型样式
@@ -204,8 +267,8 @@ private fun AccountListCard(
     onClick: () -> Unit,
     isDangerGroup: Boolean = false
 ) {
-    val statusText = getStatusText(item.account.status)
-    val statusColor = getStatusColor(item.account.status)
+    val statusText = getAccountStatusText(item.account.status)
+    val statusColor = getAccountStatusColor(item.account.status)
 
     Card(
         modifier = Modifier
@@ -276,24 +339,6 @@ private fun AccountListCard(
                 )
             }
         }
-    }
-}
-
-private fun getStatusText(status: AccountStatus): String {
-    return when (status) {
-        AccountStatus.ACTIVE -> "正常使用"
-        AccountStatus.FROZEN -> "已冻结"
-        AccountStatus.LOST -> "已丢失"
-        AccountStatus.ARCHIVED -> "已归档"
-    }
-}
-
-private fun getStatusColor(status: AccountStatus): Color {
-    return when (status) {
-        AccountStatus.ACTIVE -> HermesColors.Success
-        AccountStatus.FROZEN -> HermesColors.Danger
-        AccountStatus.LOST -> HermesColors.TextMuted
-        AccountStatus.ARCHIVED -> HermesColors.TextMuted
     }
 }
 

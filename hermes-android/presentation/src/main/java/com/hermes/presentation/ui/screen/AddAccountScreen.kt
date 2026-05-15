@@ -36,66 +36,61 @@ import com.hermes.presentation.ui.theme.HermesColors
 import com.hermes.presentation.viewmodel.OperationState
 
 /**
+ * 多渠道绑定数据结构：渠道ID -> 用途集合
+ */
+typealias MultiChannelBindings = Map<Long, Set<BindingPurpose>>
+
+/**
  * 添加账号页面（与原型一致）
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAccountScreen(
     onBackClick: () -> Unit,
-    onSaveClick: (Long, String, String?, String?) -> Unit,
+    onSaveClick: (Long, String, String?, String?, MultiChannelBindings) -> Unit,
+    onAddIdentifierClick: () -> Unit = {},
     operationState: OperationState = OperationState.Idle,
     availableIdentifiers: List<IdentifierOption> = emptyList(),
+    loadApplications: () -> Unit = {}, // 加载应用列表的回调
+    availableApps: List<AppOption> = emptyList(), // 从数据库动态获取的应用列表
     modifier: Modifier = Modifier
 ) {
+    // 进入页面时加载应用列表
+    LaunchedEffect(Unit) {
+        loadApplications()
+    }
+
     var selectedAppId by remember { mutableStateOf<Long?>(null) }
     var selectedAppName by remember { mutableStateOf<String?>(null) }
     var accountName by remember { mutableStateOf("") }
     var nickname by remember { mutableStateOf("") }
-    var selectedIdentifierId by remember { mutableStateOf<Long?>(null) }
-    var selectedPurposes by remember { mutableStateOf(setOf<BindingPurpose>()) }
+    // 多渠道绑定数据：每个渠道ID对应其用途集合
+    var channelBindings by remember { mutableStateOf<MultiChannelBindings>(emptyMap()) }
+    // 当前正在编辑用途的渠道ID
+    var editingChannelId by remember { mutableStateOf<Long?>(null) }
     var showBindingDialog by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
-    var deactivatedExpanded by remember { mutableStateOf(false) } // 已失效分组默认折叠
 
-    // 预置应用列表 - 原型样式
-    val apps = listOf(
-        AppItem(1L, "微信", Color(0xFF07c160)),
-        AppItem(2L, "QQ", Color(0xFF12b7f5)),
-        AppItem(3L, "微博", Color(0xFFe6162d)),
-        AppItem(4L, "抖音", Color(0xFF000000)),
-        AppItem(5L, "支付宝", Color(0xFF1677ff)),
-        AppItem(6L, "淘宝", Color(0xFFff4400)),
-        AppItem(7L, "京东", Color(0xFFe53935)),
-        AppItem(8L, "GitHub", Color(0xFF333333))
-    )
-
-    // 渠道按状态分组排序: ACTIVE > PENDING_DEACTIVATION > DEACTIVATED/INVALIDATED
-    val sortedIdentifiers = remember(availableIdentifiers) {
-        availableIdentifiers.sortedBy { identifier ->
-            when (identifier.status) {
-                IdentifierStatus.ACTIVE -> 0
-                IdentifierStatus.PENDING_DEACTIVATION -> 1
-                IdentifierStatus.DEACTIVATED -> 2
-                IdentifierStatus.INVALIDATED -> 3
-            }
-        }
+    // 渠道按状态分组排序（需求规格第84-89行）
+    // 组间顺序: ACTIVE > PENDING_DEACTIVATION > DEACTIVATED
+    // 组内排序: newest first (createdAt降序)
+    val activeIdentifiers = remember(availableIdentifiers) {
+        availableIdentifiers
+            .filter { it.status == IdentifierStatus.ACTIVE }
+            .sortedByDescending { it.createdAt }
+    }
+    val pendingIdentifiers = remember(availableIdentifiers) {
+        availableIdentifiers
+            .filter { it.status == IdentifierStatus.PENDING_DEACTIVATION }
+            .sortedByDescending { it.createdAt }
+    }
+    val deactivatedIdentifiers = remember(availableIdentifiers) {
+        availableIdentifiers
+            .filter { it.status == IdentifierStatus.DEACTIVATED || it.status == IdentifierStatus.INVALIDATED }
+            .sortedByDescending { it.createdAt }
     }
 
-    // 搜索过滤后的渠道
-    val filteredIdentifiers = remember(sortedIdentifiers, searchQuery) {
-        if (searchQuery.isEmpty()) {
-            sortedIdentifiers
-        } else {
-            sortedIdentifiers.filter { it.value.contains(searchQuery, ignoreCase = true) }
-        }
-    }
-
-    // 分组渠道
-    val activeIdentifiers = filteredIdentifiers.filter { it.status == IdentifierStatus.ACTIVE }
-    val pendingIdentifiers = filteredIdentifiers.filter { it.status == IdentifierStatus.PENDING_DEACTIVATION }
-    val deactivatedIdentifiers = filteredIdentifiers.filter {
-        it.status == IdentifierStatus.DEACTIVATED || it.status == IdentifierStatus.INVALIDATED
-    }
+    // 已失效分组默认折叠
+    var deactivatedExpanded by remember { mutableStateOf(false) }
 
     val isLoading = operationState == OperationState.InProgress
 
@@ -123,22 +118,40 @@ fun AddAccountScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 选择应用标题
-            Text(
-                text = "选择应用",
-                fontSize = 12.sp,
-                color = HermesColors.TextSecondary
-            )
+            // 选择应用标题（必填提示）
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "选择应用",
+                    fontSize = 12.sp,
+                    color = HermesColors.TextSecondary
+                )
+                Text(
+                    text = "（必填）",
+                    fontSize = 12.sp,
+                    color = HermesColors.Danger
+                )
+                if (selectedAppId == null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "请选择应用",
+                        fontSize = 10.sp,
+                        color = HermesColors.Warning
+                    )
+                }
+            }
 
-            // 应用图标横向滑动网格 - LazyRow
+            // 应用图标横向滑动网格 - LazyRow（从数据库动态获取）
             val appRowState = rememberLazyListState()
             LazyRow(
                 state = appRowState,
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(apps) { app ->
-                    AppIconItem(
+                items(availableApps) { app ->
+                    DynamicAppIconItem(
                         app = app,
                         selected = selectedAppName == app.name,
                         onClick = {
@@ -149,10 +162,11 @@ fun AddAccountScreen(
                 }
             }
 
-            // 账号ID输入框
+            // 账号ID输入框（必填提示）
             OutlinedTextField(
                 value = accountName,
                 onValueChange = { accountName = it },
+                label = { Text("账号 ID（必填）", color = HermesColors.TextSecondary) },
                 placeholder = { Text("账号 ID / 用户名", color = HermesColors.TextMuted) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -182,99 +196,79 @@ fun AddAccountScreen(
                 color = HermesColors.TextSecondary
             )
 
-            // 渠道搜索框
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = { Text("搜索渠道...", color = HermesColors.TextMuted) },
-                leadingIcon = {
-                    Icon(Icons.Filled.Search, contentDescription = "搜索", tint = HermesColors.TextMuted)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = HermesColors.Primary,
-                    unfocusedBorderColor = HermesColors.CardBorder
-                ),
-                singleLine = true
-            )
-
-            // 分组渠道列表
-            if (filteredIdentifiers.isEmpty()) {
+            // 渠道列表（按状态分组，短横线分隔，已失效默认折叠）
+            if (activeIdentifiers.isEmpty() && pendingIdentifiers.isEmpty() && deactivatedIdentifiers.isEmpty()) {
+                // 空状态提示
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = HermesColors.Surface)
                 ) {
-                    Text(
-                        text = if (searchQuery.isEmpty()) "暂无可用验证渠道，请先添加验证渠道" else "未找到匹配的渠道",
-                        fontSize = 14.sp,
-                        color = HermesColors.TextMuted,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "暂无可用验证渠道",
+                            fontSize = 14.sp,
+                            color = HermesColors.TextMuted
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "+ 添加渠道",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = HermesColors.Primary,
+                            modifier = Modifier.clickable { onAddIdentifierClick() }
+                        )
+                    }
                 }
             } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                // 渠道卡片列表（分组显示）
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // 正常使用分组
-                    if (activeIdentifiers.isNotEmpty()) {
-                        item {
-                            ChannelGroupHeader(
-                                title = "正常使用",
-                                count = activeIdentifiers.size,
-                                statusColor = HermesColors.Primary
-                            )
-                        }
-                        items(activeIdentifiers) { identifier ->
-                            ChannelCard(
-                                identifier = identifier,
-                                isSelected = selectedIdentifierId == identifier.id,
-                                selectedPurposes = if (selectedIdentifierId == identifier.id) selectedPurposes else emptySet(),
-                                onClick = {
-                                    if (selectedIdentifierId == identifier.id) {
-                                        // 再次点击弹出用途选择对话框
-                                        showBindingDialog = true
-                                    } else {
-                                        // 第一次点击选中
-                                        selectedIdentifierId = identifier.id
-                                        selectedPurposes = setOf(BindingPurpose.VERIFICATION) // 默认选中验证
-                                    }
+                    activeIdentifiers.forEach { identifier ->
+                        ChannelCard(
+                            identifier = identifier,
+                            isSelected = channelBindings.containsKey(identifier.id),
+                            selectedPurposes = channelBindings[identifier.id] ?: emptySet(),
+                            onClick = {
+                                if (channelBindings.containsKey(identifier.id)) {
+                                    // 已选中渠道，弹出用途选择对话框
+                                    editingChannelId = identifier.id
+                                    showBindingDialog = true
+                                } else {
+                                    // 未选中渠道，添加选中并默认设置"验证"用途
+                                    channelBindings = channelBindings + (identifier.id to setOf(BindingPurpose.VERIFICATION))
                                 }
-                            )
-                        }
+                            }
+                        )
                     }
 
-                    // 即将到期分组
+                    // 即将到期分组（如有）
                     if (pendingIdentifiers.isNotEmpty()) {
-                        item {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            HorizontalDivider(
-                                modifier = Modifier.fillMaxWidth(),
-                                color = HermesColors.CardBorder,
-                                thickness = 1.dp
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            ChannelGroupHeader(
-                                title = "即将到期",
-                                count = pendingIdentifiers.size,
-                                statusColor = Color(0xFFFF9800) // 橙色
-                            )
-                        }
-                        items(pendingIdentifiers) { identifier ->
+                        // 状态组之间用短横线分隔（无文字）
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            color = HermesColors.CardBorder,
+                            thickness = 1.dp
+                        )
+                        pendingIdentifiers.forEach { identifier ->
                             ChannelCard(
                                 identifier = identifier,
-                                isSelected = selectedIdentifierId == identifier.id,
-                                selectedPurposes = if (selectedIdentifierId == identifier.id) selectedPurposes else emptySet(),
+                                isSelected = channelBindings.containsKey(identifier.id),
+                                selectedPurposes = channelBindings[identifier.id] ?: emptySet(),
                                 onClick = {
-                                    if (selectedIdentifierId == identifier.id) {
+                                    if (channelBindings.containsKey(identifier.id)) {
+                                        // 已选中渠道，弹出用途选择对话框
+                                        editingChannelId = identifier.id
                                         showBindingDialog = true
                                     } else {
-                                        selectedIdentifierId = identifier.id
-                                        selectedPurposes = setOf(BindingPurpose.VERIFICATION)
+                                        // 未选中渠道，添加选中并默认设置"验证"用途
+                                        channelBindings = channelBindings + (identifier.id to setOf(BindingPurpose.VERIFICATION))
                                     }
                                 }
                             )
@@ -283,48 +277,62 @@ fun AddAccountScreen(
 
                     // 已失效分组（默认折叠）
                     if (deactivatedIdentifiers.isNotEmpty()) {
-                        item {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            HorizontalDivider(
-                                modifier = Modifier.fillMaxWidth(),
-                                color = HermesColors.CardBorder,
-                                thickness = 1.dp
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            ChannelGroupHeader(
-                                title = "已失效",
-                                count = deactivatedIdentifiers.size,
-                                statusColor = HermesColors.TextMuted,
-                                isExpandable = true,
-                                isExpanded = deactivatedExpanded,
-                                onToggle = { deactivatedExpanded = !deactivatedExpanded }
-                            )
-                        }
-                        // 根据折叠状态显示/隐藏已失效渠道
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            color = HermesColors.CardBorder,
+                            thickness = 1.dp
+                        )
                         if (deactivatedExpanded) {
-                            items(deactivatedIdentifiers) { identifier ->
+                            // 展开显示已失效渠道
+                            deactivatedIdentifiers.forEach { identifier ->
                                 ChannelCard(
                                     identifier = identifier,
-                                    isSelected = selectedIdentifierId == identifier.id,
-                                    selectedPurposes = if (selectedIdentifierId == identifier.id) selectedPurposes else emptySet(),
+                                    isSelected = channelBindings.containsKey(identifier.id),
+                                    selectedPurposes = channelBindings[identifier.id] ?: emptySet(),
                                     onClick = {
-                                        if (selectedIdentifierId == identifier.id) {
+                                        if (channelBindings.containsKey(identifier.id)) {
+                                            // 已选中渠道，弹出用途选择对话框
+                                            editingChannelId = identifier.id
                                             showBindingDialog = true
                                         } else {
-                                            selectedIdentifierId = identifier.id
-                                            selectedPurposes = setOf(BindingPurpose.VERIFICATION)
+                                            // 未选中渠道，添加选中并默认设置"验证"用途
+                                            channelBindings = channelBindings + (identifier.id to setOf(BindingPurpose.VERIFICATION))
                                         }
                                     }
                                 )
                             }
+                        } else {
+                            // 折叠时显示"查看全部"按钮
+                            Text(
+                                text = "查看全部 (${deactivatedIdentifiers.size})",
+                                fontSize = 12.sp,
+                                color = HermesColors.TextMuted,
+                                modifier = Modifier
+                                    .clickable { deactivatedExpanded = true }
+                                    .padding(vertical = 4.dp)
+                            )
                         }
                     }
+
+                    // 添加渠道链接
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "+ 添加渠道",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = HermesColors.Primary,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .clickable { onAddIdentifierClick() }
+                            .padding(vertical = 8.dp)
+                    )
                 }
             }
 
+            // 使用weight填充空白，确保按钮固定在底部
             Spacer(modifier = Modifier.weight(1f))
 
-            // 保存按钮 - 原型样式
+            // 保存按钮 - 原型样式（绑定验证渠道可选，不强制）
             Button(
                 onClick = {
                     if (selectedAppId != null && accountName.isNotEmpty()) {
@@ -332,7 +340,8 @@ fun AddAccountScreen(
                             selectedAppId!!,
                             accountName,
                             if (nickname.isNotEmpty()) nickname else null,
-                            null // 备注暂不传递
+                            null, // 备注暂不传递
+                            channelBindings // 多渠道绑定数据：Map<Long, Set<BindingPurpose>>
                         )
                     }
                 },
@@ -341,6 +350,7 @@ fun AddAccountScreen(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = HermesColors.Primary
                 ),
+                // 绑定验证渠道可选，只需应用和账号名称即可保存
                 enabled = !isLoading && selectedAppId != null && accountName.isNotEmpty()
             ) {
                 if (isLoading) {
@@ -362,7 +372,11 @@ fun AddAccountScreen(
     }
 
     // 绑定用途选择弹窗（点击已选渠道时显示）
-    if (showBindingDialog && selectedIdentifierId != null) {
+    if (showBindingDialog && editingChannelId != null) {
+        // 获取当前编辑渠道的用途集合
+        val currentPurposes = channelBindings[editingChannelId] ?: emptySet()
+        var tempPurposes by remember { mutableStateOf(currentPurposes) }
+
         AlertDialog(
             onDismissRequest = { showBindingDialog = false },
             modifier = Modifier
@@ -373,8 +387,10 @@ fun AddAccountScreen(
                 colors = CardDefaults.cardColors(containerColor = HermesColors.Surface)
             ) {
                 Column(modifier = Modifier.padding(24.dp)) {
+                    // 显示渠道名称
+                    val editingIdentifier = availableIdentifiers.find { it.id == editingChannelId }
                     Text(
-                        text = "选择绑定用途",
+                        text = "设置用途 - ${editingIdentifier?.value ?: "渠道"}",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = HermesColors.TextPrimary
@@ -391,36 +407,36 @@ fun AddAccountScreen(
                             purpose = BindingPurpose.LOGIN,
                             label = "登录",
                             color = Color(0xFF4CAF50), // 绿色
-                            selected = selectedPurposes.contains(BindingPurpose.LOGIN),
+                            selected = tempPurposes.contains(BindingPurpose.LOGIN),
                             onToggle = {
-                                selectedPurposes = if (selectedPurposes.contains(BindingPurpose.LOGIN))
-                                    selectedPurposes - BindingPurpose.LOGIN
+                                tempPurposes = if (tempPurposes.contains(BindingPurpose.LOGIN))
+                                    tempPurposes - BindingPurpose.LOGIN
                                 else
-                                    selectedPurposes + BindingPurpose.LOGIN
+                                    tempPurposes + BindingPurpose.LOGIN
                             }
                         )
                         PurposeChip(
                             purpose = BindingPurpose.VERIFICATION,
                             label = "验证",
                             color = HermesColors.Primary, // 主题色
-                            selected = selectedPurposes.contains(BindingPurpose.VERIFICATION),
+                            selected = tempPurposes.contains(BindingPurpose.VERIFICATION),
                             onToggle = {
-                                selectedPurposes = if (selectedPurposes.contains(BindingPurpose.VERIFICATION))
-                                    selectedPurposes - BindingPurpose.VERIFICATION
+                                tempPurposes = if (tempPurposes.contains(BindingPurpose.VERIFICATION))
+                                    tempPurposes - BindingPurpose.VERIFICATION
                                 else
-                                    selectedPurposes + BindingPurpose.VERIFICATION
+                                    tempPurposes + BindingPurpose.VERIFICATION
                             }
                         )
                         PurposeChip(
                             purpose = BindingPurpose.RECOVERY,
                             label = "找回",
                             color = Color(0xFF2196F3), // 蓝色
-                            selected = selectedPurposes.contains(BindingPurpose.RECOVERY),
+                            selected = tempPurposes.contains(BindingPurpose.RECOVERY),
                             onToggle = {
-                                selectedPurposes = if (selectedPurposes.contains(BindingPurpose.RECOVERY))
-                                    selectedPurposes - BindingPurpose.RECOVERY
+                                tempPurposes = if (tempPurposes.contains(BindingPurpose.RECOVERY))
+                                    tempPurposes - BindingPurpose.RECOVERY
                                 else
-                                    selectedPurposes + BindingPurpose.RECOVERY
+                                    tempPurposes + BindingPurpose.RECOVERY
                             }
                         )
                     }
@@ -433,24 +449,24 @@ fun AddAccountScreen(
                             purpose = BindingPurpose.NOTIFICATION,
                             label = "通知",
                             color = Color(0xFFFF9800), // 橙色
-                            selected = selectedPurposes.contains(BindingPurpose.NOTIFICATION),
+                            selected = tempPurposes.contains(BindingPurpose.NOTIFICATION),
                             onToggle = {
-                                selectedPurposes = if (selectedPurposes.contains(BindingPurpose.NOTIFICATION))
-                                    selectedPurposes - BindingPurpose.NOTIFICATION
+                                tempPurposes = if (tempPurposes.contains(BindingPurpose.NOTIFICATION))
+                                    tempPurposes - BindingPurpose.NOTIFICATION
                                 else
-                                    selectedPurposes + BindingPurpose.NOTIFICATION
+                                    tempPurposes + BindingPurpose.NOTIFICATION
                             }
                         )
                         PurposeChip(
                             purpose = BindingPurpose.SECONDARY_AUTH,
                             label = "二次验证",
                             color = Color(0xFF9C27B0), // 紫色
-                            selected = selectedPurposes.contains(BindingPurpose.SECONDARY_AUTH),
+                            selected = tempPurposes.contains(BindingPurpose.SECONDARY_AUTH),
                             onToggle = {
-                                selectedPurposes = if (selectedPurposes.contains(BindingPurpose.SECONDARY_AUTH))
-                                    selectedPurposes - BindingPurpose.SECONDARY_AUTH
+                                tempPurposes = if (tempPurposes.contains(BindingPurpose.SECONDARY_AUTH))
+                                    tempPurposes - BindingPurpose.SECONDARY_AUTH
                                 else
-                                    selectedPurposes + BindingPurpose.SECONDARY_AUTH
+                                    tempPurposes + BindingPurpose.SECONDARY_AUTH
                             }
                         )
                     }
@@ -461,23 +477,42 @@ fun AddAccountScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        // 取消选中按钮
                         Button(
-                            onClick = { showBindingDialog = false },
+                            onClick = {
+                                // 移除该渠道的绑定
+                                editingChannelId?.let { channelId ->
+                                    channelBindings = channelBindings - channelId
+                                }
+                                showBindingDialog = false
+                            },
                             modifier = Modifier.weight(1f).height(48.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = HermesColors.Surface.copy(alpha = 0.8f)
+                                containerColor = HermesColors.Danger.copy(alpha = 0.1f)
                             )
                         ) {
                             Text(
-                                text = "取消",
+                                text = "取消选中",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = HermesColors.TextPrimary
+                                color = HermesColors.Danger
                             )
                         }
+                        // 确认按钮
                         Button(
-                            onClick = { showBindingDialog = false },
+                            onClick = {
+                                // 更新该渠道的用途
+                                editingChannelId?.let { channelId ->
+                                    if (tempPurposes.isNotEmpty()) {
+                                        channelBindings = channelBindings + (channelId to tempPurposes)
+                                    } else {
+                                        // 如果用途为空，移除该渠道
+                                        channelBindings = channelBindings - channelId
+                                    }
+                                }
+                                showBindingDialog = false
+                            },
                             modifier = Modifier.weight(1f).height(48.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -494,46 +529,6 @@ fun AddAccountScreen(
                     }
                 }
             }
-        }
-    }
-}
-
-/**
- * 渠道分组标题
- */
-@Composable
-private fun ChannelGroupHeader(
-    title: String,
-    count: Int,
-    statusColor: Color,
-    isExpandable: Boolean = false,
-    isExpanded: Boolean = true,
-    onToggle: () -> Unit = {}
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(
-                if (isExpandable) Modifier.clickable { onToggle() }
-                else Modifier
-            )
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "$title ($count)",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = statusColor
-        )
-        if (isExpandable) {
-            Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                contentDescription = if (isExpanded) "折叠" else "展开",
-                tint = statusColor,
-                modifier = Modifier.size(16.dp)
-            )
         }
     }
 }
@@ -636,17 +631,21 @@ private fun PurposeDot(purpose: BindingPurpose) {
     )
 }
 
+/**
+ * 动态应用图标组件（从数据库获取的应用）
+ */
 @Composable
-private fun AppIconItem(
-    app: AppItem,
+private fun DynamicAppIconItem(
+    app: AppOption,
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val appColor = getAppColor(app.name)
     Box(
         modifier = Modifier
             .size(56.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(app.color)
+            .background(appColor)
             .then(
                 if (selected)
                     Modifier.border(2.dp, HermesColors.Primary, RoundedCornerShape(12.dp))
@@ -700,8 +699,28 @@ private fun PurposeChip(
     }
 }
 
-private data class AppItem(
+/**
+ * 应用选项数据类（从数据库获取）
+ */
+data class AppOption(
     val id: Long,
     val name: String,
-    val color: Color
+    val category: String? = null,
+    val iconUrl: String? = null
 )
+
+/**
+ * 获取应用颜色（根据名称匹配）
+ */
+private fun getAppColor(appName: String): Color = when {
+    appName.contains("微信") -> Color(0xFF07c160)
+    appName.contains("QQ") -> Color(0xFF12b7f5)
+    appName.contains("微博") -> Color(0xFFe6162d)
+    appName.contains("抖音") -> Color(0xFF000000)
+    appName.contains("支付宝") -> Color(0xFF1677ff)
+    appName.contains("淘宝") -> Color(0xFFff4400)
+    appName.contains("京东") -> Color(0xFFe53935)
+    appName.contains("GitHub") -> Color(0xFF333333)
+    appName.contains("银行") -> Color(0xFF1677ff)
+    else -> HermesColors.Primary
+}

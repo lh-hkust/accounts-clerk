@@ -232,18 +232,6 @@ private fun getStatusInfo(status: AccountStatus): StatusInfo {
     }
 }
 
-/**
- * 获取状态对应的颜色
- */
-private fun getAccountStatusColor(status: AccountStatus): Color {
-    return when (status) {
-        AccountStatus.ACTIVE -> HermesColors.Success
-        AccountStatus.FROZEN -> HermesColors.Info
-        AccountStatus.LOST -> HermesColors.Warning
-        AccountStatus.ARCHIVED -> HermesColors.TextMuted
-    }
-}
-
 private data class StatusInfo(
     val text: String,
     val description: String

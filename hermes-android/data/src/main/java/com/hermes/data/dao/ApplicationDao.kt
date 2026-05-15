@@ -10,6 +10,9 @@ interface ApplicationDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(entity: ApplicationEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertOrIgnore(entities: List<ApplicationEntity>)
+
     @Update
     suspend fun update(entity: ApplicationEntity)
 
@@ -30,6 +33,9 @@ interface ApplicationDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM application WHERE name = :name)")
     suspend fun existsByName(name: String): Boolean
+
+    @Query("SELECT COUNT(*) FROM application")
+    suspend fun getCount(): Int
 
     @Query("UPDATE application SET isActive = :isActive, updatedAt = :updatedAt WHERE id = :id")
     suspend fun updateActiveStatus(id: Long, isActive: Boolean, updatedAt: Long)

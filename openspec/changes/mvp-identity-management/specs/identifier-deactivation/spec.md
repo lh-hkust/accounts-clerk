@@ -60,6 +60,45 @@ The system SHALL allow users to modify deactivation date of existing plan. New d
 - **AND** system updates IdentifierDeactivation.scheduledTime
 - **AND** system updates warning trigger time
 
+### Requirement: User can mark identifier as deactivated immediately
+
+The system SHALL allow users to mark identifier as DEACTIVATED without waiting for planned date. This operation SHALL require confirmation dialog and SHALL clear all related warnings.
+
+#### Scenario: Mark as deactivated from ACTIVE status
+- **WHEN** identifier status is ACTIVE
+- **AND** user clicks "Mark as Deactivated" from context menu
+- **THEN** system displays confirmation dialog
+- **AND** dialog title: "确认标记为已失效？"
+- **AND** dialog message: "此渠道将立即失效，绑定账号将无法使用此渠道登录或验证。"
+- **AND** dialog shows affected account count
+- **AND** primary button: "确认失效" (danger color)
+- **AND** secondary button: "取消"
+
+#### Scenario: Execute mark as deactivated (ACTIVE)
+- **WHEN** user clicks "确认失效" in confirmation dialog
+- **AND** identifier status is ACTIVE
+- **THEN** system updates identifier status to DEACTIVATED
+- **AND** system sets actualDeactTime to current timestamp
+- **AND** system creates IdentifierDeactivation entity with status=EXECUTED and deactType=MANUAL
+- **AND** system deletes all related WarningRecord entities
+- **AND** system returns to identifier list page
+
+#### Scenario: Mark as deactivated from PENDING_DEACTIVATION status
+- **WHEN** identifier status is PENDING_DEACTIVATION
+- **AND** user clicks "Mark as Deactivated" from context menu
+- **THEN** system displays confirmation dialog
+- **AND** dialog message: "此渠道将立即失效，原定于X天后停机的计划将提前执行。"
+- **AND** dialog shows affected account count
+
+#### Scenario: Execute mark as deactivated (PENDING_DEACTIVATION)
+- **WHEN** user clicks "确认失效" in confirmation dialog
+- **AND** identifier status is PENDING_DEACTIVATION
+- **THEN** system updates identifier status to DEACTIVATED
+- **AND** system sets actualDeactTime to current timestamp
+- **AND** system updates IdentifierDeactivation status to EXECUTED
+- **AND** system deletes all related WarningRecord entities
+- **AND** system returns to identifier list page
+
 ### Requirement: System enforces deactivation status rules
 
 The system SHALL prevent setting deactivation plan for identifiers that are already DEACTIVATED or INVALIDATED.

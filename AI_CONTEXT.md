@@ -54,6 +54,33 @@ docs/
 - 最后给出 **重构建议** 和 **对现有规格的影响分析**。
 - 聚合根操作必须通过 Repository，禁止直接操作数据库。
 
+
+## 审核Agent使用指南
+
+在执行独立审视时，必须读取以下文档：
+
+1. **需求规格**：`openspec/changes/*/specs/*/spec.md`
+2. **典型问题**：`docs/common-pitfalls.md`
+3. **原型设计**：`prototype/hermes-prototype.html`(注意原型可能也存在问题)
+
+**审视prompt模板**：
+
+```
+独立审视以下实现，必须对照需求规格验证：
+
+1. 需求规格位置：openspec/changes/mvp-identity-management/specs/[module]/spec.md
+2. 典型问题文档：docs/common-pitfalls.md
+3. 原型位置：prototype/hermes-prototype.html
+
+审视步骤：
+- 先读取需求规格，列出关键要求
+- 读取典型问题文档，检查是否存在已记录的典型问题
+- 对照原型验证UI一致性
+- 对照代码逐一验证需求规格要求
+- 发现问题需明确指出违反的具体规格条款
+```
+
+---
 ## 6. 禁止行为
 - 不要生成敏捷相关文档。
 - 不要在未更新 `specs/` 的情况下直接修改代码。

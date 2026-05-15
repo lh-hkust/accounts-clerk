@@ -50,12 +50,10 @@ fun SettingsScreen(
             )
         }
 
-        // 用户信息卡片 - 原型样式：头像+名称+单机版本
+        // 用户信息卡片 - MVP单机版本：显示"本地用户（单机版）"，无退出登录功能
         item {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { },
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = HermesColors.Surface)
             ) {
@@ -87,14 +85,14 @@ fun SettingsScreen(
 
                     Column {
                         Text(
-                            text = "本地用户",
+                            text = "本地用户（单机版）",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = HermesColors.TextPrimary
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "单机版本",
+                            text = "数据仅保存在本设备",
                             fontSize = 12.sp,
                             color = HermesColors.TextMuted
                         )
@@ -171,26 +169,6 @@ fun SettingsScreen(
                         color = HermesColors.TextMuted
                     )
                 }
-            }
-        }
-
-        // 退出登录按钮 - 原型样式：红色边框
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = { },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = HermesColors.Surface.copy(alpha = 0.8f)
-                )
-            ) {
-                Text(
-                    text = "退出登录",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = HermesColors.Danger
-                )
             }
         }
     }

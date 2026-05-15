@@ -121,22 +121,6 @@ fun WarningCard(
     }
 }
 
-private fun getWarningLevelColor(level: WarningLevel): Color {
-    return when (level) {
-        WarningLevel.HIGH -> HermesColors.Danger
-        WarningLevel.MEDIUM -> HermesColors.Warning
-        WarningLevel.LOW -> HermesColors.TextMuted
-    }
-}
-
-private fun getWarningLevelText(level: WarningLevel): String {
-    return when (level) {
-        WarningLevel.HIGH -> "紧急"
-        WarningLevel.MEDIUM -> "建议"
-        WarningLevel.LOW -> "低"
-    }
-}
-
 private fun getMessageText(warning: WarningRecord): String {
     return when {
         warning.message.contains("到期") || warning.message.contains("停机") -> "手机号: 138****8888"

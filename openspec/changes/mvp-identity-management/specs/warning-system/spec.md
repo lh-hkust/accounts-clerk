@@ -2,7 +2,7 @@
 
 ### Requirement: System automatically triggers warning on deactivation plan
 
-The system SHALL automatically create warning records when deactivation plan is set. Warning level SHALL be calculated based on affected account count and account category.
+The system SHALL automatically create warning records when deactivation plan is set. Warning level SHALL be calculated based on affected account count, account category, and days until expiry. Warning levels are: CRITICAL (最高级), HIGH (紧急), MEDIUM (建议), LOW (低).
 
 #### Scenario: Trigger warning on plan creation
 - **WHEN** identifier status is PENDING_DEACTIVATION
@@ -15,30 +15,46 @@ The system SHALL automatically create warning records when deactivation plan is 
 - **AND** isRead is false
 - **AND** isHandled is false
 
+#### Scenario: Calculate warning level CRITICAL for imminent expiry
+- **WHEN** deactivation date is within 7 days
+- **THEN** system calculates warningLevel as CRITICAL
+- **AND** badge color is #dc2626 (红色)
+- **AND** UI label is "最高级"
+
 #### Scenario: Calculate warning level HIGH for financial accounts
 - **WHEN** identifier has bound financial application accounts
+- **AND** deactivation date is more than 7 days away
 - **THEN** system calculates warningLevel as HIGH
+- **AND** badge color is #ef4444 (红色)
+- **AND** UI label is "紧急"
 
 #### Scenario: Calculate warning level HIGH for many accounts
 - **WHEN** identifier has more than 5 bound accounts and no financial applications
+- **AND** deactivation date is more than 7 days away
 - **THEN** system calculates warningLevel as HIGH
 
 #### Scenario: Calculate warning level MEDIUM
 - **WHEN** identifier has 2-5 bound accounts and no financial applications
+- **AND** deactivation date is more than 7 days away
 - **THEN** system calculates warningLevel as MEDIUM
+- **AND** badge color is #eab308 (黄色)
+- **AND** UI label is "建议"
 
 #### Scenario: Calculate warning level LOW
 - **WHEN** identifier has 1 bound account and account is not sensitive
+- **AND** deactivation date is more than 14 days away
 - **THEN** system calculates warningLevel as LOW
+- **AND** badge color is #6b7280 (灰色)
+- **AND** UI label is "低"
 
 ### Requirement: User can view warning list
 
-The system SHALL display warning list on home dashboard sorted by warning level (HIGH→MEDIUM→LOW). Each warning SHALL display message, affected account count, trigger time, and read status.
+The system SHALL display warning list on home dashboard sorted by warning level (CRITICAL→HIGH→MEDIUM→LOW). Each warning SHALL display message, affected account count, trigger time, and read status.
 
 #### Scenario: View warning list sorted by level
 - **WHEN** 3 unhandled warnings exist and user enters home dashboard
 - **THEN** system displays warning list
-- **AND** warnings are sorted by warningLevel (HIGH→MEDIUM→LOW)
+- **AND** warnings are sorted by warningLevel (CRITICAL→HIGH→MEDIUM→LOW)
 - **AND** each warning displays message, affected account count, trigger time
 - **AND** system distinguishes read/unread status
 
@@ -49,8 +65,8 @@ The system SHALL provide "Quick Handle" button on home dashboard. When clicked, 
 #### Scenario: Click quick handle button
 - **WHEN** user clicks "Quick Handle" button on dashboard
 - **THEN** system displays unhandled warning list (max 3 items)
-- **AND** warnings are sorted by warningLevel (HIGH→MEDIUM→LOW) and then by deadline
-- **AND** clicking warning enters warning detail page
+- **AND** warnings are sorted by warningLevel (CRITICAL→HIGH→MEDIUM→LOW) and then by deadline
+- **AND** clicking warning enters identifier detail page (merged design)
 
 ### Requirement: User can view all warnings in secondary page
 
@@ -64,21 +80,20 @@ The system SHALL provide "View All" button to enter full warning list page. The 
 - **AND** user can expand to view handled warnings
 
 #### Scenario: Mark warning as handled
-- **WHEN** user views warning detail and clicks "Mark Handled" button
+- **WHEN** user views identifier detail and clicks "Mark Handled" button
 - **THEN** system updates isHandled to true
 - **AND** system records handledAt timestamp
 - **AND** warning moves to handled section in warning list
 - **AND** warning is removed from dashboard quick handle list
 
-### Requirement: User can view warning details
+### Requirement: User can view warning details (merged into identifier detail)
 
-The system SHALL display warning detail page with identifier info, deactivation plan info, affected account list (application icon, account name, binding purpose), and handling suggestions. Viewing SHALL automatically mark as read.
+The system SHALL display warning information within identifier detail page. Warning section SHALL show deactivation plan info, affected account list, and handling suggestions. Viewing SHALL automatically mark warning as read.
 
-#### Scenario: View warning details
+#### Scenario: View warning details within identifier detail page
 - **WHEN** warning record exists and user clicks warning card
-- **THEN** system enters warning detail page
-- **AND** system displays identifier info
-- **AND** system displays deactivation plan info
+- **THEN** system enters identifier detail page (影响范围)
+- **AND** system displays warning section at top with deactivation plan info
 - **AND** system displays affected account list with application icon, account name, binding purpose
 - **AND** system displays handling suggestions
 - **AND** system updates isRead to true

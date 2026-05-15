@@ -16,7 +16,7 @@ import com.hermes.data.entity.*
         WarningRecordEntity::class,
         BindingHistoryRecordEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class HermesDatabase : RoomDatabase() {

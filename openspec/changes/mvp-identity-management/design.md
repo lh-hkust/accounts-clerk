@@ -1,6 +1,6 @@
 ## Context
 
-Hermes Android 是一款 Android 账号管理工具，采用 DDD（领域驱动设计）方法论，数据完全本地存储，使用 SQLCipher + Android Keystore 加密。项目遵循 TDD（测试驱动开发）原则，所有业务逻辑必须有对应的单元测试。
+Hermes 是一款 Android 账号管理工具，采用 DDD（领域驱动设计）方法论，数据完全本地存储，使用 SQLCipher + Android Keystore 加密。项目遵循 TDD（测试驱动开发）原则，所有业务逻辑必须有对应的单元测试。
 
 **技术栈约束**：
 - Android Room 作为数据库封装层

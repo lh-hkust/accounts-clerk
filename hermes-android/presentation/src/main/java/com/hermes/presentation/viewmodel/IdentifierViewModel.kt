@@ -2,6 +2,7 @@ package com.hermes.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hermes.data.preferences.UserPreferencesManager
 import com.hermes.domain.valueobject.IdentifierType
 import com.hermes.presentation.usecase.identifier.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,8 @@ class IdentifierViewModel @Inject constructor(
     private val getIdentifierListUseCase: GetIdentifierListUseCase,
     private val addIdentifierUseCase: AddIdentifierUseCase,
     private val deleteIdentifierUseCase: DeleteIdentifierUseCase,
-    private val checkDuplicateUseCase: CheckDuplicateIdentifierUseCase
+    private val checkDuplicateUseCase: CheckDuplicateIdentifierUseCase,
+    private val userPreferencesManager: UserPreferencesManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<IdentifierListState>(IdentifierListState.Loading)
@@ -31,19 +33,55 @@ class IdentifierViewModel @Inject constructor(
     private val _deleteCheckState = MutableStateFlow<DeleteCheckState>(DeleteCheckState.Idle)
     val deleteCheckState: StateFlow<DeleteCheckState> = _deleteCheckState.asStateFlow()
 
+    // 手势提示是否已显示
+    private val _gestureHintShown = MutableStateFlow(false)
+    val gestureHintShown: StateFlow<Boolean> = _gestureHintShown.asStateFlow()
+
     init {
         loadIdentifiers()
+        // 监听手势提示状态
+        viewModelScope.launch {
+            userPreferencesManager.gestureHintShown.collect { shown ->
+                _gestureHintShown.value = shown
+            }
+        }
     }
+
+    // 搜索查询
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    // 原始列表（用于搜索过滤）
+    private var originalItems: List<IdentifierListItem> = emptyList()
 
     fun loadIdentifiers() {
         viewModelScope.launch {
             _uiState.value = IdentifierListState.Loading
             try {
                 val items = getIdentifierListUseCase()
-                _uiState.value = IdentifierListState.Success(items)
+                originalItems = items
+                applySearchFilter()
             } catch (e: Exception) {
                 _uiState.value = IdentifierListState.Error(e.message ?: "Unknown error")
             }
+        }
+    }
+
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+        applySearchFilter()
+    }
+
+    private fun applySearchFilter() {
+        val query = _searchQuery.value.trim()
+        if (query.isEmpty()) {
+            _uiState.value = IdentifierListState.Success(originalItems)
+        } else {
+            val filteredItems = originalItems.filter { item ->
+                item.identifier.value.contains(query, ignoreCase = true) ||
+                item.identifier.remark?.contains(query, ignoreCase = true) == true
+            }
+            _uiState.value = IdentifierListState.Success(filteredItems)
         }
     }
 
@@ -56,7 +94,8 @@ class IdentifierViewModel @Inject constructor(
                 } else {
                     getIdentifierListUseCase()
                 }
-                _uiState.value = IdentifierListState.Success(items)
+                originalItems = items
+                applySearchFilter()
             } catch (e: Exception) {
                 _uiState.value = IdentifierListState.Error(e.message ?: "Unknown error")
             }
@@ -72,8 +111,10 @@ class IdentifierViewModel @Inject constructor(
                 loadIdentifiers()
             } catch (e: IllegalArgumentException) {
                 _operationState.value = OperationState.Error(e.message ?: "Failed to add identifier")
+            } catch (e: android.database.sqlite.SQLiteConstraintException) {
+                _operationState.value = OperationState.Error("数据约束错误：该渠道可能已存在")
             } catch (e: Exception) {
-                _operationState.value = OperationState.Error("Unknown error")
+                _operationState.value = OperationState.Error("添加失败：${e.message ?: "请检查输入是否正确"}")
             }
         }
     }
@@ -132,6 +173,15 @@ class IdentifierViewModel @Inject constructor(
 
     fun resetDeleteCheckState() {
         _deleteCheckState.value = DeleteCheckState.Idle
+    }
+
+    /**
+     * 标记手势提示已显示
+     */
+    fun markGestureHintShown() {
+        viewModelScope.launch {
+            userPreferencesManager.setGestureHintShown(true)
+        }
     }
 }
 

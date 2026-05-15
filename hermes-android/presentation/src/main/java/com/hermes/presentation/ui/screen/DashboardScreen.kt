@@ -41,8 +41,36 @@ fun DashboardScreen(
     onAccountListClick: () -> Unit,
     onImportClick: () -> Unit,
     onExportClick: () -> Unit,
+    onAddIdentifierClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    // 区分三种状态：空状态/部分数据状态/完整数据状态
+    val isEmptyState = identifierStats.totalCount == 0 && accountStats.totalCount == 0
+    val isPartialState = identifierStats.totalCount > 0 && accountStats.totalCount == 0 // 有验证渠道但无账号
+
+    // 综合安全指数计算（考虑健康度、账号状态、预警）
+    val securityScore = when {
+        isEmptyState -> 0 // 空状态无数据，显示引导而非数值
+        isPartialState -> {
+            // 部分数据状态：验证渠道健康度
+            if (identifierStats.totalCount > 0) {
+                (identifierStats.activeCount * 100 / identifierStats.totalCount)
+            } else {
+                0
+            }
+        }
+        else -> {
+            // 完整数据状态：综合安全指数
+            var score = 100 - unhandledWarningCount * 10
+            // 验证渠道健康度扣分
+            if (identifierStats.totalCount > 0) {
+                val unhealthyRate = (identifierStats.totalCount - identifierStats.activeCount).toFloat() / identifierStats.totalCount
+                score -= (unhealthyRate * 20).toInt()
+            }
+            maxOf(0, score)
+        }
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -60,14 +88,33 @@ fun DashboardScreen(
             )
         }
 
-        // 账号安全指数卡片 - 原型样式
+        // 账号安全指数卡片 - 区分三种状态
         item {
-            SafetyIndexCard(
-                score = maxOf(0, 100 - unhandledWarningCount * 10),
-                warningCount = unhandledWarningCount,
-                accountStats = accountStats.totalCount,
-                onQuickHandle = onQuickHandle
-            )
+            when {
+                isEmptyState -> {
+                    // 空状态：显示引导和添加按钮
+                    EmptyStateSafetyIndexCard(
+                        onAddIdentifierClick = onAddIdentifierClick
+                    )
+                }
+                isPartialState -> {
+                    // 部分数据状态：显示验证渠道健康度，引导添加账号
+                    PartialDataSafetyIndexCard(
+                        healthScore = securityScore,
+                        identifierStats = identifierStats,
+                        onAddAccountClick = onAccountListClick
+                    )
+                }
+                else -> {
+                    // 完整数据状态：显示综合安全指数
+                    SafetyIndexCard(
+                        score = securityScore,
+                        warningCount = unhandledWarningCount,
+                        accountStats = accountStats.totalCount,
+                        onQuickHandle = onQuickHandle
+                    )
+                }
+            }
         }
 
         // 验证渠道/账号库入口 - 原型样式：两列卡片
@@ -89,7 +136,7 @@ fun DashboardScreen(
                     icon = Icons.Filled.Inventory2,
                     iconBgColor = HermesColors.Secondary.copy(alpha = 0.2f),
                     iconColor = HermesColors.Secondary,
-                    title = "账号库",
+                    title = "账号",
                     subtitle = "${accountStats.totalCount}个账号",
                     onClick = onAccountListClick,
                     modifier = Modifier.weight(1f)
@@ -238,6 +285,168 @@ private fun SafetyIndexCard(
                         color = HermesColors.TextPrimary
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * 部分数据状态安全指数卡片 - 有验证渠道但无账号
+ */
+@Composable
+private fun PartialDataSafetyIndexCard(
+    healthScore: Int,
+    identifierStats: IdentifierStats,
+    onAddAccountClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, HermesColors.Primary.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = HermesColors.Surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = "验证渠道健康度",
+                fontSize = 12.sp,
+                color = HermesColors.TextSecondary
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = healthScore.toString(),
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Black,
+                color = HermesColors.TextPrimary
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 进度条
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(HermesColors.SurfaceLight)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(healthScore.toFloat().coerceIn(0f, 100f) / 100f)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(HermesColors.Primary, HermesColors.Secondary)
+                            )
+                        )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "已录入 ${identifierStats.totalCount} 个验证渠道，未绑定账号",
+                fontSize = 12.sp,
+                color = HermesColors.TextPrimary.copy(alpha = 0.8f)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 引导添加账号
+            Button(
+                onClick = onAddAccountClick,
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = HermesColors.Primary)
+            ) {
+                Text(
+                    text = "添加账号建立绑定关系",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 23.4.1 空状态安全指数卡片 - 显示引导而非数值
+ */
+@Composable
+private fun EmptyStateSafetyIndexCard(
+    onAddIdentifierClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, HermesColors.Primary.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = HermesColors.Surface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // 图标
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(HermesColors.Primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Shield,
+                    contentDescription = null,
+                    tint = HermesColors.Primary.copy(alpha = 0.5f),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 暂无数据提示
+            Text(
+                text = "暂无数据",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = HermesColors.TextPrimary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "添加验证渠道开始保护账号",
+                fontSize = 14.sp,
+                color = HermesColors.TextSecondary
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 立即添加按钮
+            Button(
+                onClick = onAddIdentifierClick,
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = HermesColors.Primary
+                )
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "立即添加",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }

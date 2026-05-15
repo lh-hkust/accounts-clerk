@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.sp
 import com.hermes.domain.valueobject.AccountStatus
 import com.hermes.domain.valueobject.BindingPurpose
 import com.hermes.presentation.ui.theme.HermesColors
+import com.hermes.presentation.ui.component.getAccountStatusText
+import com.hermes.presentation.ui.component.getAccountStatusColor
 import com.hermes.presentation.viewmodel.AccountDetailState
 import com.hermes.presentation.usecase.account.AccountDetail
 import com.hermes.presentation.usecase.account.IdentifierBindingInfo
@@ -237,8 +239,8 @@ private fun AccountInfoCard(
     detail: AccountDetail,
     onEditClick: () -> Unit
 ) {
-    val statusText = getStatusText(detail.account.status)
-    val statusColor = getStatusColor(detail.account.status)
+    val statusText = getAccountStatusText(detail.account.status)
+    val statusColor = getAccountStatusColor(detail.account.status)
     val appColor = getAppIconColor(detail.applicationName)
 
     Card(
@@ -457,24 +459,6 @@ private fun RelatedAccountCard(
                 tint = HermesColors.TextMuted
             )
         }
-    }
-}
-
-private fun getStatusText(status: AccountStatus): String {
-    return when (status) {
-        AccountStatus.ACTIVE -> "正常使用"
-        AccountStatus.FROZEN -> "已冻结"
-        AccountStatus.LOST -> "已丢失"
-        AccountStatus.ARCHIVED -> "已归档"
-    }
-}
-
-private fun getStatusColor(status: AccountStatus): Color {
-    return when (status) {
-        AccountStatus.ACTIVE -> HermesColors.Success
-        AccountStatus.FROZEN -> HermesColors.Danger
-        AccountStatus.LOST -> HermesColors.TextMuted
-        AccountStatus.ARCHIVED -> HermesColors.TextMuted
     }
 }
 
