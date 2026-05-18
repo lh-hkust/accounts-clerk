@@ -8,3 +8,12 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.compose.compiler) apply false
 }
+
+// 全局Kotlin JVM版本配置
+subprojects {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
+}

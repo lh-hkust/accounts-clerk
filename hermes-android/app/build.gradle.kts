@@ -1,3 +1,5 @@
+import java.util.Base64
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -15,33 +17,93 @@ android {
         applicationId = "com.hermes.app"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+
+        // versionCode从环境变量读取，默认为1（必须是整数）
+        versionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
+
+        // versionName从环境变量读取，若未设置则默认为0.1.1
+        versionName = System.getenv("VERSION_NAME") ?: "0.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // 签名配置：从环境变量读取（支持跳过签名）
+    signingConfigs {
+        create("release") {
+            val keystoreBase64 = System.getenv("KEYSTORE_BASE64")
+            val keystorePassword = System.getenv("KEYSTORE_PASSWORD")
+            val envKeyAlias = System.getenv("KEY_ALIAS")
+            val envKeyPassword = System.getenv("KEY_PASSWORD")
+            val skipSigning = System.getenv("SKIP_SIGNING")?.toBoolean() ?: false
+
+            if (!skipSigning && keystoreBase64 != null && keystorePassword != null &&
+                envKeyAlias != null && envKeyPassword != null) {
+                // 从BASE64解码并写入临时文件
+                val keystoreFile = File.createTempFile("keystore", ".jks")
+                keystoreFile.deleteOnExit()
+                keystoreFile.writeBytes(Base64.getDecoder().decode(keystoreBase64))
+                storeFile = keystoreFile
+                storePassword = keystorePassword
+                keyAlias = envKeyAlias
+                keyPassword = envKeyPassword
+            }
+        }
+    }
+
+    // ABI拆分：生成arm64-v8a和x86独立APK
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86")
+            isUniversalApk = false  // 不生成通用APK
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // 使用release签名配置（若环境变量未设置或跳过签名则使用debug签名）
+            val releaseSigningConfig = signingConfigs.findByName("release")
+            val skipSigning = System.getenv("SKIP_SIGNING")?.toBoolean() ?: false
+            if (!skipSigning && releaseSigningConfig?.storeFile != null) {
+                signingConfig = releaseSigningConfig
+            } else {
+                println("WARNING: Using debug signing (SKIP_SIGNING=$skipSigning or env vars not set)")
+                signingConfig = signingConfigs.getByName("debug")
+            }
         }
         debug {
             isMinifyEnabled = false
+            // debug使用默认调试签名
         }
     }
+
+    // App Bundle动态分发按架构拆分
+    bundle {
+        abi {
+            enableSplit = true
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         compose = true
+    }
+}
+
+// 打印版本名的Task（供CI获取版本号）
+tasks.register("printVersionName") {
+    doLast {
+        println(project.android.defaultConfig.versionName)
     }
 }
 
