@@ -75,7 +75,7 @@ fun EditAccountScreen(
     var duplicateError by remember { mutableStateOf<String?>(null) }
     var hasCheckedDuplicate by remember { mutableStateOf(true) } // 初始值已通过
 
-    val appColor = getAppIconColor(applicationName)
+    val appColor = com.hermes.presentation.ui.util.AppColorUtils.getAppColor(applicationName)
 
     // 渠道按状态分组排序: ACTIVE > PENDING_DEACTIVATION > DEACTIVATED/INVALIDATED
     val sortedIdentifiers = remember(availableIdentifiers) {
@@ -1291,7 +1291,7 @@ private fun getStatusIcon(status: AccountStatus): androidx.compose.ui.graphics.v
     }
 }
 
-private fun getAppIconColor(appName: String): Color {
+private fun com.hermes.presentation.ui.util.AppColorUtils.getAppColor(appName: String): Color {
     return when {
         appName.contains("微信") -> Color(0xFF07c160)
         appName.contains("支付宝") -> Color(0xFF1677ff)

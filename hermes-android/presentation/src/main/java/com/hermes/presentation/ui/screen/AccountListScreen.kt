@@ -294,7 +294,7 @@ private fun AccountListCard(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(getAppIconColor(item.applicationName)),
+                    .background(com.hermes.presentation.ui.util.AppColorUtils.getAppColor(item.applicationName)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -342,19 +342,7 @@ private fun AccountListCard(
     }
 }
 
-private fun getAppIconColor(appName: String): Color {
-    return when {
-        appName.contains("微信") -> Color(0xFF07c160)
-        appName.contains("支付宝") -> Color(0xFF1677ff)
-        appName.contains("微博") -> Color(0xFFe6162d)
-        appName.contains("抖音") -> Color(0xFF000000)
-        appName.contains("淘宝") -> Color(0xFFff4400)
-        appName.contains("京东") -> Color(0xFFe53935)
-        appName.contains("QQ") -> Color(0xFF12b7f5)
-        appName.contains("招商银行") || appName.contains("银行") -> Color(0xFF1677ff)
-        else -> HermesColors.Primary
-    }
-}
+// 使用统一的AppColorUtils工具类（函数已删除，由AppColorUtils替代）
 
 private data class AccountCategory(
     val name: String,

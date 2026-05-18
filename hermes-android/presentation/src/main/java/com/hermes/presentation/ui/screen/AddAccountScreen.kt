@@ -640,7 +640,7 @@ private fun DynamicAppIconItem(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val appColor = getAppColor(app.name)
+    val appColor = com.hermes.presentation.ui.util.AppColorUtils.getAppColor(app.name)
     Box(
         modifier = Modifier
             .size(56.dp)
@@ -709,18 +709,4 @@ data class AppOption(
     val iconUrl: String? = null
 )
 
-/**
- * 获取应用颜色（根据名称匹配）
- */
-private fun getAppColor(appName: String): Color = when {
-    appName.contains("微信") -> Color(0xFF07c160)
-    appName.contains("QQ") -> Color(0xFF12b7f5)
-    appName.contains("微博") -> Color(0xFFe6162d)
-    appName.contains("抖音") -> Color(0xFF000000)
-    appName.contains("支付宝") -> Color(0xFF1677ff)
-    appName.contains("淘宝") -> Color(0xFFff4400)
-    appName.contains("京东") -> Color(0xFFe53935)
-    appName.contains("GitHub") -> Color(0xFF333333)
-    appName.contains("银行") -> Color(0xFF1677ff)
-    else -> HermesColors.Primary
-}
+// 使用统一的AppColorUtils工具类（函数已删除，由AppColorUtils替代）
